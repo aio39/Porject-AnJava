@@ -1,0 +1,30 @@
+{
+  "objectName":"is users schema",
+  "name": "aio",
+  "password": "qwe123",
+  "type": "studentOrAdmin",
+  "yjuNum": "1701037",
+  "email": "aio@g.yju.ac.kr",
+  "relistedRoom": [
+    { "roomNum": "202", "sitNum": "03", "reserveDate":"ms"},
+    { "roomNum": "203", "sitNum": "02","reserveDate":"ms" },
+    { "roomNum": "204", "sitNum": "01","reserveDate":"ms" }
+  ]
+}
+
+{
+    "roomNum":"202",
+    "column":"10",
+    "row":"5",
+    "columnBlank":[5],
+    "rowBlank":[3,6],
+    "maxSit":"50",
+    "resetDate":"ms",
+    "reserveData":{
+        "1":"userA",
+        "2":"null",
+        "3":"userB",
+        "4":"null",
+        "5":"forbidden"
+    },
+}
