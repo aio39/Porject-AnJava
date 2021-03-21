@@ -31,7 +31,9 @@ const UserSchema = new mongoose.Schema({
 });
 
 UserSchema.statics.checkUnique = async function (key, value) {
-  const isUnique = await this.findOne({ key: value }).exec();
+  const isUnique = await this.findOne({ [key]: value }, (err, docs) => {
+    return docs;
+  });
   if (isUnique == null) return [true, key];
   return [false, key];
 };
@@ -60,7 +62,6 @@ UserSchema.statics.createAccount = async function (
       that.handlePassword(password),
     ]).then(results => {
       results.forEach(result => {
-        console.log(result);
         if (result[0] === false) {
           signSuccess = false;
           if (result[1] === 'password') {
@@ -68,20 +69,17 @@ UserSchema.statics.createAccount = async function (
           } else {
             errorMsg += `${result[1]}은 이미 존재합니다.`;
           }
-          console.log(errorMsg);
         }
       });
     });
   }
 
   return checkFinish().then(() => {
-    console.log(signSuccess);
     if (signSuccess === true) {
       try {
         that.create({ userId, name, password, email, yjuNum });
       } catch (error) {
         console.log(`DB 등록에 실패하였습니다. ${error}`);
-        console.log(signSuccess);
         errorMsg += '서버에 문제가 있었습니다. 다시 시도해 주십시오.';
       }
     }

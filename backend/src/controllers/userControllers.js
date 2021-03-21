@@ -1,7 +1,6 @@
-import routes from '../routes';
 import userModel from '../models/User';
 
-export const postLogin = async (req, res, next) => {
+export const postLogin = async (req, res) => {
   const {
     body: { userId, password },
   } = req;
