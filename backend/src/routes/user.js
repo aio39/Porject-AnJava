@@ -1,26 +1,12 @@
 import { Router } from 'express';
-import User from '../models/User';
-const router = Router();
+// import userModel from '../models/User';
+import { postLogin, postSign } from '../controllers/userControllers';
+import routes from '../routes';
 
-router.get('/', (req, res) => {
-  return res.send('안녕');
-});
+const userRouter = Router();
 
-router.get('/:userId', async (req, res) => {
-  const {
-    params: { userId },
-  } = req;
-  await User.create(
-    userId,
-    'aio2',
-    'password',
-    'aiodev2.js@gmail.com',
-    2109998,
-  );
-  await User.findOne({ userId: 'aio' }).then(user =>
-    console.log(`찾은 유저의 정보는 ${user}`),
-  );
-  return res.send(userId);
-});
+userRouter.post('/', postLogin);
 
-export default router;
+userRouter.post(routes.userSign, postSign);
+
+export default userRouter;

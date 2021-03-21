@@ -1,5 +1,6 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable no-console */
 import mongoose from 'mongoose';
-import roomSchema from './Room.';
 
 const UserSchema = new mongoose.Schema({
   userId: {
@@ -17,17 +18,92 @@ const UserSchema = new mongoose.Schema({
   yjuNum: { type: Number, length: 7, unique: true, required: true },
   reservedRooms: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Room',
+      room: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Room',
+      },
+      reserveDate: {
+        type: Date,
+        default: Date.now,
+      },
     },
   ],
 });
 
-UserSchema.statics.create = function (userId, name, password, email, yjuNum) {
-  const newUser = new this({ userId, name, password, email, yjuNum });
-  return newUser.save();
+UserSchema.statics.checkUnique = async function (key, value) {
+  const isUnique = await this.findOne({ key: value }).exec();
+  if (isUnique == null) return [true, key];
+  return [false, key];
 };
 
-const model = mongoose.model('User', UserSchema);
+UserSchema.statics.handlePassword = async function (password) {
+  if (password.length > 7) return [true, 'password'];
+  return [false, 'password'];
+};
 
-export default model;
+UserSchema.statics.createAccount = async function (
+  userId,
+  name,
+  password,
+  email,
+  yjuNum,
+) {
+  let signSuccess = true;
+  let errorMsg = '';
+  const that = this;
+
+  function checkFinish() {
+    return Promise.all([
+      that.checkUnique('userId', userId),
+      that.checkUnique('email', email),
+      that.checkUnique('yjuNum', yjuNum),
+      that.handlePassword(password),
+    ]).then(results => {
+      results.forEach(result => {
+        console.log(result);
+        if (result[0] === false) {
+          signSuccess = false;
+          if (result[1] === 'password') {
+            errorMsg += `비밀번호가 너무 짧습니다.`;
+          } else {
+            errorMsg += `${result[1]}은 이미 존재합니다.`;
+          }
+          console.log(errorMsg);
+        }
+      });
+    });
+  }
+
+  return checkFinish().then(() => {
+    console.log(signSuccess);
+    if (signSuccess === true) {
+      try {
+        that.create({ userId, name, password, email, yjuNum });
+      } catch (error) {
+        console.log(`DB 등록에 실패하였습니다. ${error}`);
+        console.log(signSuccess);
+        errorMsg += '서버에 문제가 있었습니다. 다시 시도해 주십시오.';
+      }
+    }
+    console.log(signSuccess, errorMsg);
+    return { signSuccess, errorMsg };
+  });
+};
+
+UserSchema.statics.checkPassword = async function (userId, password) {
+  const userPass = await this.findOne()
+    .where('userId')
+    .equals(userId)
+    .then(result => {
+      return result.password;
+    });
+  if (password === userPass) {
+    console.log(`일치합니다. ${userPass}`);
+  } else {
+    console.log(`일치하지않습니다. ${userPass}`);
+  }
+};
+
+const userModel = mongoose.model('User', UserSchema);
+
+export default userModel;

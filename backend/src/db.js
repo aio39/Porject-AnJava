@@ -3,18 +3,21 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-mongoose.connect(process.env.MONGO_URL, {
-  useMongoClient: true,
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useFindAndModify: false,
-  useCreateIndex: true,
-});
+const connectToDB = () => {
+  mongoose
+    .connect(process.env.MONGO_URL, {
+      dbName: 'anjava',
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+      useCreateIndex: true,
+    })
+    .then(() => console.log('✅  Connected to DB'))
+    .catch(error => console.log(`❌ Error on DB Connection:${error}`));
+};
 
-const db = mongoose.connection;
+connectToDB();
 
-const handleOpen = () => console.log('✅  Connected to DB');
-const handleError = error => console.log(`❌ Error on DB Connection:${error}`);
-
-db.once('open', handleOpen);
-db.on('error', handleError);
+// const db = mongoose.connection;
+// db.once('open', handleOpen);
+// db.on('error', setInterval(connectToDB, 3000));
