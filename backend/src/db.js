@@ -5,8 +5,7 @@ dotenv.config();
 
 const connectToDB = () => {
   mongoose
-    .connect(process.env.MONGO_URL, {
-      dbName: 'anjava',
+    .connect(process.env.MONGO_URL_ATLAS, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useFindAndModify: false,
