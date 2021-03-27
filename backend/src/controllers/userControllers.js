@@ -4,8 +4,7 @@ export const postLogin = async (req, res) => {
   const {
     body: { userId, password },
   } = req;
-  console.log(userId, password);
-  userModel.checkPassword(userId, password);
+  res.send(await userModel.checkPassword(userId, password));
 };
 
 export const postSign = async (req, res) => {

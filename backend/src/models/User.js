@@ -97,9 +97,10 @@ UserSchema.statics.checkPassword = async function (userId, password) {
     });
   if (password === userPass) {
     console.log(`일치합니다. ${userPass}`);
-  } else {
-    console.log(`일치하지않습니다. ${userPass}`);
+    return true;
   }
+  console.log(`일치하지않습니다. ${userPass}`);
+  return false;
 };
 
 const userModel = mongoose.model('User', UserSchema);
