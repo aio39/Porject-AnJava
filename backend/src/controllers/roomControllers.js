@@ -13,7 +13,31 @@ export const getAllRooms = async (req, res) => {
   });
 };
 
-export const getOneRoom = (req, res) => {};
+export const getOneRoom = (req, res) => {
+  const {
+    params: { id },
+  } = req;
+  roomModel
+    .findOne({ roomNum: id })
+    .populate('reservedData.user', 'userId')
+    .exec((err, room) => {
+      if (err) return res.status(400).send(err);
+      const sitReserveData = {};
+      room.reservedData.forEach(data => {
+        sitReserveData[data.sitNum] = data.user.userId;
+      });
+      const dataJson = {
+        row: room.row,
+        column: room.column,
+        columnBlankLine: room.columnBlankLine || [],
+        rowBlankLine: room.rowBlankLine || [],
+        maxSit: room.row * room.column,
+        resetDate: room.resetDate || '',
+        reservedData: sitReserveData,
+      };
+      return res.send(dataJson);
+    });
+};
 
 export const postNewRoom = async (req, res) => {
   const {
@@ -53,7 +77,7 @@ export const postReserveRoom = async (req, res) => {
     const userData = await userModel.findOne().where('userId').equals(userId);
     const update = await roomModel.updateOne(
       { roomNum },
-      { $push: { reservedData: [{ sitNum, user: userData }] } },
+      { $push: { reservedData: [{ sitNum, user: userData._id }] } },
       { new: true },
       function (err, model) {
         if (err) {

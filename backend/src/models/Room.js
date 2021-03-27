@@ -8,7 +8,6 @@ const RoomSchema = new mongoose.Schema({
   rowBlankLine: [Number],
   maxSit: Number,
   resetDate: Number,
-  dummy: [Number],
   reservedData: [
     {
       sitNum: Number,
