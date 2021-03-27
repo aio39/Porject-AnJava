@@ -20,6 +20,7 @@ export const getOneRoom = (req, res) => {
   roomModel
     .findOne({ roomNum: id })
     .populate('reservedData.user', 'userId')
+    .sort({ 'reservedData.sitNum': 1 })
     .exec((err, room) => {
       if (err) return res.status(400).send(err);
       const sitReserveData = {};

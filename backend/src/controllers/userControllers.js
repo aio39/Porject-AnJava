@@ -1,5 +1,4 @@
 import userModel from '../models/User';
-import CryptoJS from 'crypto-js';
 
 export const postLogin = async (req, res) => {
   const {
