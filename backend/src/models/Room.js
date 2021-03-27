@@ -8,17 +8,18 @@ const RoomSchema = new mongoose.Schema({
   rowBlankLine: [Number],
   maxSit: Number,
   resetDate: Number,
+  dummy: [Number],
   reservedData: [
     {
       sitNum: Number,
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
     },
   ],
 });
 
-// user: {
-//   type: mongoose.Schema.Types.ObjectId,
-//   ref: 'User',
-// },
 RoomSchema.statics.checkRoomOverlap = async function (roomNum) {
   const isUnique = await this.findOne({ roomNum }, (err, docs) => {
     if (err) return err;
@@ -60,7 +61,10 @@ RoomSchema.statics.createRoom = async function (
 };
 
 RoomSchema.methods.checkReserve = sitNum => {
-  this.findOne({ reservedData: { sitNum } });
+  this.findOne({ reservedData: [{ sitNum }] }, (err, docs) => {
+    if (err) return true;
+    return false;
+  });
 };
 
 const roomModel = mongoose.model('Room', RoomSchema);

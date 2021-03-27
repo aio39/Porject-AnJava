@@ -34,24 +34,34 @@ export const postReserveRoom = async (req, res) => {
   const {
     body: { userId, roomNum, sitNum },
   } = req;
-  const userData = await userModel
-    .findOne()
-    .where('userId')
-    .equals(userId)
-    .select('userId _id');
-  console.log(userData._id);
-  const reserveData = {};
-  const update = await roomModel.findOneAndUpdate(
-    { roomNum },
-    { $push: { reserveData: sitNum } },
-    { new: true },
-    (err, desc) => {
-      return desc;
-    },
-  );
-  console.log(update);
-  //   roomModel.update(
-  //     { roomNum },
-  //     { reservedData: { sitNum, user: userData['_id'] } },
-  //   );
+  const isReserve = await roomModel
+    .findOne(
+      {
+        roomNum,
+      },
+      {
+        reservedData: { $elemMatch: { sitNum } },
+      },
+    )
+    .then(docs => {
+      if (docs.reservedData.length > 0) return true;
+      return false;
+    });
+  if (isReserve) {
+    res.send({ isSuccess: false, errMsg: '이미 예약된 좌석' });
+  } else {
+    const userData = await userModel.findOne().where('userId').equals(userId);
+    const update = await roomModel.updateOne(
+      { roomNum },
+      { $push: { reservedData: [{ sitNum, user: userData }] } },
+      { new: true },
+      function (err, model) {
+        if (err) {
+          res.send({ isSuccess: false, errMsg: '에러가 발생했습니다.' });
+          return;
+        }
+        res.send({ isSuccess: true, errMsg: '' });
+      },
+    );
+  }
 };
