@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-console */
 import mongoose from 'mongoose';
+import CryptoJS from 'crypto-js';
 
 const UserSchema = new mongoose.Schema({
   userId: {
@@ -12,7 +13,7 @@ const UserSchema = new mongoose.Schema({
     required: true,
   },
   name: { type: String, min: 2, max: 5, trim: true, required: true },
-  password: { type: String, min: 8, trim: true, required: true },
+  password: { type: String, required: true },
   email: { type: String, trim: true, required: true },
   isAdmin: { type: Boolean, default: false },
   yjuNum: { type: Number, length: 7, unique: true, required: true },
@@ -77,7 +78,12 @@ UserSchema.statics.createAccount = async function (
   return checkFinish().then(() => {
     if (signSuccess === true) {
       try {
-        that.create({ userId, name, password, email, yjuNum });
+        const encryptedPass = CryptoJS.AES.encrypt(
+          password,
+          process.env.CRYPTO_SECRET_KEY,
+        ).toString();
+        console.log(encryptedPass);
+        that.create({ userId, name, password: encryptedPass, email, yjuNum });
       } catch (error) {
         console.log(`DB 등록에 실패하였습니다. ${error}`);
         errorMsg += '서버에 문제가 있었습니다. 다시 시도해 주십시오.';
@@ -89,17 +95,20 @@ UserSchema.statics.createAccount = async function (
 };
 
 UserSchema.statics.checkPassword = async function (userId, password) {
-  const userPass = await this.findOne()
+  const encryptedUserPass = await this.findOne()
     .where('userId')
     .equals(userId)
     .then(result => {
       return result.password;
     });
-  if (password === userPass) {
-    console.log(`일치합니다. ${userPass}`);
+  const bytes = CryptoJS.AES.decrypt(
+    encryptedUserPass,
+    process.env.CRYPTO_SECRET_KEY,
+  );
+  const decryptedUserPass = bytes.toString(CryptoJS.enc.Utf8);
+  if (password.toString() === decryptedUserPass.toString()) {
     return true;
   }
-  console.log(`일치하지않습니다. ${userPass}`);
   return false;
 };
 
