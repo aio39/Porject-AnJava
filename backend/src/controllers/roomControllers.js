@@ -1,6 +1,34 @@
 import roomModel from '../models/Room';
 import userModel from '../models/User';
 
+const createNewSitData = (
+  sitReserveData,
+  row,
+  column,
+  rowBlankLine,
+  columnBlankLine,
+) => {
+  const rowLength = row + rowBlankLine.length;
+  const columnLength = column + columnBlankLine.length;
+  let sitCount = 1;
+  const newSitData = [];
+  for (let r = 1; r <= rowLength; r++) {
+    for (let c = 1; c <= columnLength; c++) {
+      if (rowBlankLine.includes(r) || columnBlankLine.includes(c)) {
+        newSitData.push({ sitNum: 0, userId: null });
+        continue;
+      }
+      newSitData.push({
+        sitNum: sitCount,
+        userId: sitReserveData[sitCount] || 'yet',
+      });
+      sitCount++;
+      continue;
+    }
+  }
+  return newSitData;
+};
+
 export const getAllRooms = async (req, res) => {
   roomModel.find({}, (err, rooms) => {
     if (err) res.send(err);
@@ -27,14 +55,24 @@ export const getOneRoom = (req, res) => {
       room.reservedData.forEach(data => {
         sitReserveData[data.sitNum] = data.user.userId;
       });
+
+      const newSitData = createNewSitData(
+        sitReserveData,
+        room.row,
+        room.column,
+        room.rowBlankLine,
+        room.columnBlankLine,
+      );
+      const totalRow = room.row + room.rowBlankLine.length;
+      const totalColumn = room.column + room.columnBlankLine.length;
+      const maxSit = totalRow * totalColumn; //  공간 분리용 칸 포함
+
       const dataJson = {
-        row: room.row,
-        column: room.column,
-        columnBlankLine: room.columnBlankLine || [],
-        rowBlankLine: room.rowBlankLine || [],
-        maxSit: room.row * room.column,
+        totalRow,
+        totalColumn,
+        maxSit,
         resetDate: room.resetDate || '',
-        reservedData: sitReserveData,
+        reservedData: newSitData,
       };
       return res.send(dataJson);
     });
