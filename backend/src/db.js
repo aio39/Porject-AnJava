@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+mongoose.set('debug', true);
+
 const connectToDB = () => {
   mongoose
     .connect(process.env.MONGO_URL_ATLAS, {
