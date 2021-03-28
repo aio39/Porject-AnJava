@@ -116,13 +116,13 @@ export const postReserveRoom = async (req, res) => {
     const userData = await userModel.findOne().where('userId').equals(userId);
     const update = await roomModel.updateOne(
       { roomNum },
-      { $push: { reservedData: [{ sitNum, user: userData._id }] } },
-      { new: true },
+      { $addToSet: { reservedData: [{ sitNum, user: userData._id }] } },
       function (err, model) {
         if (err) {
           res.send({ isSuccess: false, errMsg: '에러가 발생했습니다.' });
           return;
         }
+        console.log('duplicate');
         res.send({ isSuccess: true, errMsg: '' });
       },
     );
