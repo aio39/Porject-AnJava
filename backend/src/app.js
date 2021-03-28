@@ -18,4 +18,12 @@ app.use(express.json());
 app.use(routes.users, userRouter);
 app.use(routes.room, roomRouter);
 
+app.use((req, res, next) => {
+  const error = `${req.method} ${req.url} 라우터가 없습니다.`;
+  res.status(500);
+  res.send({ error: error });
+});
+
+app;
+
 export default app;
