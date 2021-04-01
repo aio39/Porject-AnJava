@@ -66,6 +66,18 @@ RoomSchema.methods.checkReserve = sitNum => {
   });
 };
 
+RoomSchema.virtual('totalRow').get(function () {
+  return this.row + this.rowBlankLine.length;
+});
+
+RoomSchema.virtual('totalColumn').get(function () {
+  return this.column + this.columnBlankLine.length;
+});
+
+RoomSchema.virtual('maxSitIncludeBlank').get(function () {
+  return this.totalRow * this.totalColumn;
+});
+
 const roomModel = mongoose.model('Room', RoomSchema);
 
 export default roomModel;

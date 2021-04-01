@@ -63,14 +63,14 @@ export const getOneRoom = (req, res) => {
         room.rowBlankLine,
         room.columnBlankLine,
       );
-      const totalRow = room.row + room.rowBlankLine.length;
-      const totalColumn = room.column + room.columnBlankLine.length;
-      const maxSit = totalRow * totalColumn; //  공간 분리용 칸 포함
+      // const totalRow = room.row + room.rowBlankLine.length;
+      // const totalColumn = room.column + room.columnBlankLine.length;
+      // const maxSitIncludeBlank = totalRow * totalColumn; //  공간 분리용 칸 포함
 
       const dataJson = {
-        totalRow,
-        totalColumn,
-        maxSit,
+        totalRow: room.totalRow,
+        totalColumn: room.totalColumn,
+        maxSitIncludeBlank: room.maxSitIncludeBlank,
         resetDate: room.resetDate || '',
         reservedData: newSitData,
       };
@@ -110,8 +110,35 @@ export const postReserveRoom = async (req, res) => {
       if (docs.reservedData.length > 0) return true;
       return false;
     });
+
+  let userObjectId;
+
+  await userModel
+    .findOne({ userId })
+    .exec()
+    .then(user => (userObjectId = user._id));
+
+  await roomModel.exists(
+    {
+      roomNum,
+      'reservedData.user': userObjectId,
+    },
+    (err, docs) => {
+      if (docs) {
+        isUserHaveReserve = true;
+      } else {
+        isUserHaveReserve = false;
+      }
+    },
+  );
+
   if (isReserve) {
     res.send({ isSuccess: false, errMsg: '이미 예약된 좌석' });
+  } else if (isUserHaveReserve) {
+    res.send({
+      isSuccess: false,
+      errMsg: `${userId}님은 이미 예약한 상태입니다.`,
+    });
   } else {
     const userData = await userModel.findOne().where('userId').equals(userId);
     const update = await roomModel.updateOne(
@@ -122,7 +149,6 @@ export const postReserveRoom = async (req, res) => {
           res.send({ isSuccess: false, errMsg: '에러가 발생했습니다.' });
           return;
         }
-        console.log('duplicate');
         res.send({ isSuccess: true, errMsg: '' });
       },
     );
