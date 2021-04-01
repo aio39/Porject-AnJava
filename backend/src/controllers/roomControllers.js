@@ -93,6 +93,50 @@ export const postNewRoom = async (req, res) => {
   res.send(result);
 };
 
+export const deleteReserveRoom = async (req, res) => {
+  const {
+    body: { userId, roomNum, sitNum },
+  } = req;
+  let userObjectId;
+
+  await userModel
+    .findOne({ userId })
+    .exec()
+    .then(user => (userObjectId = user._id));
+  console.log(userObjectId);
+
+  const isReserve = await roomModel
+    .findOne(
+      {
+        roomNum,
+        'reservedData.user': userObjectId,
+        'reservedData.sitNum': sitNum,
+      },
+      {
+        reservedData: { $elemMatch: { sitNum } },
+      },
+    )
+    .exec()
+    .then(docs => {
+      console.log(docs);
+      if (docs) return true;
+      return false;
+    });
+
+  if (isReserve) {
+    await roomModel.updateOne(
+      { roomNum },
+      { $pull: { reservedData: { sitNum } } },
+    );
+    console.log(sitNum);
+    res.send({ msg: '삭제했습니다.' });
+  } else {
+    res.json({ msg: '예약이 되어있지 않습니다.' });
+  }
+
+  console.log(isReserve);
+};
+
 export const postReserveRoom = async (req, res) => {
   const {
     body: { userId, roomNum, sitNum },
