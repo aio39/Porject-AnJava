@@ -8,7 +8,7 @@ import { notFoundResponse, unauthorizedResponse } from './helpers/apiResponse';
 const app = express();
 
 app.use(morgan('dev'));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 app.use(routes.users, userRouter);
@@ -25,11 +25,13 @@ app.all('*', (req, res) => {
   return notFoundResponse(res, 'Page not found');
 });
 
-app.use((err, req, res) => {
-  if (err.name === 'UnauthorizedError') {
-    console.error(err);
-    return unauthorizedResponse(res, err.message);
-  }
+app.use((err, req, res, next) => {
+  console.error(err);
+  return unauthorizedResponse(res, err.message);
+});
+
+process.on('uncaughtException', err => {
+  console.log('uncaughtException' + err);
 });
 
 export default app;
