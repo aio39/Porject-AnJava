@@ -6,6 +6,8 @@ import {
   getOneRoom,
   postReserveRoom,
   deleteReserveRoom,
+  patchResetDateRoom,
+  getTestResetDateRoom,
 } from '../controllers/roomControllers';
 
 const router = Router();
@@ -15,5 +17,7 @@ router.post('/', postNewRoom);
 router.get(routes.roomOne, getOneRoom);
 router.post(routes.reserveRoom, postReserveRoom);
 router.delete(routes.reserveRoom, deleteReserveRoom);
+router.patch(routes.resetDateRoom, patchResetDateRoom);
+router.get(routes.resetDateRoom, getTestResetDateRoom);
 
 export default router;

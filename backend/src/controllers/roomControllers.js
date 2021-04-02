@@ -1,5 +1,6 @@
 import roomModel from '../models/Room';
 import userModel from '../models/User';
+import { timezoneChangeToKR } from '../helpers/utility';
 
 const createNewSitData = (
   sitReserveData,
@@ -27,6 +28,36 @@ const createNewSitData = (
     }
   }
   return newSitData;
+};
+
+export const patchResetDateRoom = async (req, res) => {
+  const {
+    body: { resetDate: resetDateString, roomNum },
+  } = req;
+  const resetDate = new Date(resetDateString);
+  roomModel
+    .findOneAndUpdate({ roomNum }, { $set: { resetDate } })
+    .exec()
+    .then(docs => console.log(docs));
+  res.send(resetDate.toString());
+};
+
+export const getTestResetDateRoom = async (req, res) => {
+  const {
+    params: { id },
+  } = req;
+
+  roomModel
+    .findOne({ roomNum: id })
+    .exec()
+    .then(docs => {
+      const date = docs.resetDate;
+
+      res.send(date);
+    })
+    .catch(err => {
+      res.status(400).send(err.message);
+    });
 };
 
 export const getAllRooms = async (req, res) => {

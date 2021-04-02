@@ -7,7 +7,7 @@ const RoomSchema = new mongoose.Schema({
   columnBlankLine: [Number],
   rowBlankLine: [Number],
   maxSit: Number,
-  resetDate: Number,
+  resetDate: Date,
   reservedData: [
     {
       sitNum: Number,
@@ -77,6 +77,10 @@ RoomSchema.virtual('totalColumn').get(function () {
 RoomSchema.virtual('maxSitIncludeBlank').get(function () {
   return this.totalRow * this.totalColumn;
 });
+
+// RoomSchema.virtual('resetDateKR').get(function () {
+//   return this.resetDate;
+// });
 
 const roomModel = mongoose.model('Room', RoomSchema);
 
