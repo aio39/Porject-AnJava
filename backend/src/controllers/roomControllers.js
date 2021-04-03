@@ -192,20 +192,15 @@ export const postReserveRoom = async (req, res) => {
     .findOne({ userId })
     .exec()
     .then(user => (userObjectId = user._id));
-
-  await roomModel.exists(
-    {
+  const isUserHaveReserve = await roomModel
+    .exists({
       roomNum,
       'reservedData.user': userObjectId,
-    },
-    (err, docs) => {
-      if (docs) {
-        isUserHaveReserve = true;
-      } else {
-        isUserHaveReserve = false;
-      }
-    },
-  );
+    })
+    .then(exist => {
+      if (exist) return true;
+      return false;
+    });
 
   if (isReserve) {
     res.send({ isSuccess: false, errMsg: '이미 예약된 좌석' });
