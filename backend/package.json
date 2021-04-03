@@ -5,7 +5,7 @@
   "main": "src/init.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon --exec babel-node src/init.js",
+    "start": "babel-node --experimental-modules --es-module-specifier-resolution=node  src/init.js",
     "dev": "nodemon --experimental-modules --es-module-specifier-resolution=node src/init.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
