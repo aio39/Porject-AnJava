@@ -30,6 +30,14 @@ const createNewSitData = (
   return newSitData;
 };
 
+const resetRoomReserve = async roomNum => {
+  const res = await roomModel.updateOne(
+    { roomNum },
+    { $set: { reservedData: [], resetDate: undefined } },
+  );
+  console.log(res);
+};
+
 const getResetDateArray = async (req, res) => {
   try {
     const arr = await roomModel.find({}, 'roomNum resetDate').exec();
@@ -57,13 +65,14 @@ const getResetDateArray = async (req, res) => {
 
     let nextResetScheduleData = { date: arr2[0][1], nextResetRoom };
     console.log(nextResetScheduleData);
+    return nextResetScheduleData;
   } catch (error) {
     res.status(500).json({ false: false, error });
   }
 };
 
 export const getResetTest = async (req, res) => {
-  getResetDateArray();
+  resetRoomReserve(201);
   res.send('Test');
 };
 
