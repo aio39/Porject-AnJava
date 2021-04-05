@@ -8,10 +8,12 @@ import {
   deleteReserveRoom,
   patchResetDateRoom,
   getTestResetDateRoom,
+  getResetTest,
 } from '../controllers/roomControllers';
 
 const router = Router();
 
+router.get('/resettest', getResetTest);
 router.get('/', getAllRooms);
 router.post('/', postNewRoom);
 router.get(routes.roomOne, getOneRoom);
