@@ -1,6 +1,5 @@
 import roomModel from '../models/Room';
 import userModel from '../models/User';
-import { timezoneChangeToKR } from '../helpers/utility';
 
 const createNewSitData = (
   sitReserveData,
@@ -30,44 +29,15 @@ const createNewSitData = (
   return newSitData;
 };
 
-const resetRoomReserve = async roomNum => {
-  const res = await roomModel.updateOne(
-    { roomNum },
-    { $set: { reservedData: [], resetDate: undefined } },
-  );
-  console.log(res);
-};
-
-const getResetDateArray = async (req, res) => {
+export const resetRoomReserve = async roomNum => {
   try {
-    const arr = await roomModel.find({}, 'roomNum resetDate').exec();
-    const arr2 = [];
-    for (const room of arr) {
-      if (room.resetDate) {
-        arr2.push([room.roomNum, new Date(room.resetDate)]);
-      }
-    }
-    arr2.sort((a, b) => {
-      return a[1] - b[1];
-    });
-    // .then(docs => console.log(docs))
-    // .catch(err => console.log(err));
-    let count = 1;
-    let nextResetRoom = [];
-    for (let i = 0; i < arr2.length - 1; i++) {
-      const isSameTime = arr2[i][1].getTime() == arr2[i + 1][1].getTime();
-      if (!isSameTime) break;
-      count++;
-    }
-    for (let i = 0; i < count; i++) {
-      nextResetRoom.push(arr2[i][0]);
-    }
-
-    let nextResetScheduleData = { date: arr2[0][1], nextResetRoom };
-    console.log(nextResetScheduleData);
-    return nextResetScheduleData;
+    const res = await roomModel.updateOne(
+      { roomNum },
+      { $set: { reservedData: [], resetDate: undefined } },
+    );
+    return true;
   } catch (error) {
-    res.status(500).json({ false: false, error });
+    return error;
   }
 };
 

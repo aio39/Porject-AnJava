@@ -5,7 +5,10 @@ import userRouter from './routes/user';
 import roomRouter from './routes/room';
 import testRouter from './routes/test';
 import { notFoundResponse, unauthorizedResponse } from './helpers/apiResponse';
-
+import {
+  getNextResetScheduleData,
+  registerResetRoomScheduleJob,
+} from './helpers/utility';
 process.env.NODE_ENV = process.env.NODE_ENV
   ? process.env.NODE_ENV
   : 'production';
@@ -18,6 +21,22 @@ app.use(express.json());
 
 app.use(routes.users, userRouter);
 app.use(routes.room, roomRouter);
+
+export let nextResetScheduleData;
+
+(async function () {
+  try {
+    //  nextResetScheduleData = await getNextResetScheduleData();
+
+    nextResetScheduleData = {
+      date: new Date(Date.now() + 4000),
+      nextResetRoom: [202, 201],
+    };
+    registerResetRoomScheduleJob();
+  } catch (error) {
+    console.log(error);
+  }
+})();
 
 if (process.env.NODE_ENV === 'develope') app.use('/test', testRouter);
 
