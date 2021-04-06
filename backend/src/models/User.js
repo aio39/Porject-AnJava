@@ -2,6 +2,7 @@
 /* eslint-disable no-console */
 import mongoose from 'mongoose';
 import CryptoJS from 'crypto-js';
+import validator from 'validator';
 
 const UserSchema = new mongoose.Schema({
   userId: {
@@ -62,6 +63,10 @@ UserSchema.statics.createAccount = async function (
       that.checkUnique('yjuNum', yjuNum),
       that.handlePassword(password),
     ]).then(results => {
+      if (!validator.isEmail(email)) {
+        signSuccess = false;
+        errorMsg += '이메일 형식이 옳바르지 않습니다.';
+      }
       results.forEach(result => {
         if (result[0] === false) {
           signSuccess = false;
