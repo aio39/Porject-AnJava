@@ -44,16 +44,26 @@ export const getNextResetScheduleData = async () => {
 
 export const registerResetRoomScheduleJob = () => {
   const { date, nextResetRoom: roomNumArr } = nextResetScheduleData;
-  // console.log(date, roomNumArr);
-  // console.log(roomNumArr instanceof Array);
-  schedule.scheduleJob(date, resetAndRegisterNewReset);
+  console.log(`rRRS Func: ${date}`);
+  let jobs = schedule.scheduleJob(date, resetAndRegisterNewReset);
+  console.log(jobs);
 };
 
 const resetAndRegisterNewReset = async () => {
   for (const room of nextResetScheduleData.nextResetRoom) {
     await resetRoomReserve(room);
   }
-  nextResetScheduleData.date = new Date(Date.now() + 4000);
-  console.log(nextResetScheduleData);
+
+  await setResetData();
+  console.log('실행순서');
   registerResetRoomScheduleJob();
+};
+
+const setResetData = async () => {
+  const newData = await getNextResetScheduleData();
+  const { date, nextResetRoom } = newData;
+  console.log(newData);
+  nextResetScheduleData.date = date;
+  nextResetScheduleData.nextResetRoom = nextResetRoom;
+  console.log(`setResetData Func: ${nextResetScheduleData.date}`);
 };
