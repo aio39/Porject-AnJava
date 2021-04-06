@@ -46,7 +46,7 @@ export const registerResetRoomScheduleJob = () => {
   const { date, nextResetRoom: roomNumArr } = nextResetScheduleData;
   console.log(`rRRS Func: ${date}`);
   let jobs = schedule.scheduleJob(date, resetAndRegisterNewReset);
-  console.log(jobs);
+  console.log(jobs.name);
 };
 
 const resetAndRegisterNewReset = async () => {
@@ -55,8 +55,12 @@ const resetAndRegisterNewReset = async () => {
   }
 
   await setResetData();
-  console.log('실행순서');
-  registerResetRoomScheduleJob();
+  if (nextResetScheduleData.date) {
+    console.log('다음 리셋을 등록합니다.');
+    registerResetRoomScheduleJob();
+  } else {
+    console.log('등록된 초기화가 없습니다.');
+  }
 };
 
 const setResetData = async () => {
@@ -66,4 +70,18 @@ const setResetData = async () => {
   nextResetScheduleData.date = date;
   nextResetScheduleData.nextResetRoom = nextResetRoom;
   console.log(`setResetData Func: ${nextResetScheduleData.date}`);
+};
+
+export const testPatchResetDate = async () => {
+  const roomNumArr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+
+  for (let roomNum of roomNumArr) {
+    roomModel
+      .findOneAndUpdate(
+        { roomNum },
+        { $set: { resetDate: Date.now() + 5000 * roomNum + 5000 } },
+      )
+      .exec()
+      .then(docs => console.log(`${roomNum}에 fake reset 등록`));
+  }
 };
