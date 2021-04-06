@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node --experimental-modules --es-module-specifier-resolution=node  src/init.js",
-    "dev": "nodemon --experimental-modules --es-module-specifier-resolution=node src/init.js",
+    "dev": "cross-env NODE_ENV=develope  nodemon --experimental-modules --es-module-specifier-resolution=node src/init.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -39,6 +39,7 @@
     "@babel/polyfill": "^7.12.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "crypto-js": "^4.0.0",
     "defer-to-connect": "^1.1.3",
     "dotenv": "^8.2.0",

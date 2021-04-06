@@ -3,7 +3,12 @@ import morgan from 'morgan';
 import routes from './routes';
 import userRouter from './routes/user';
 import roomRouter from './routes/room';
+import testRouter from './routes/test';
 import { notFoundResponse, unauthorizedResponse } from './helpers/apiResponse';
+
+process.env.NODE_ENV = process.env.NODE_ENV
+  ? process.env.NODE_ENV
+  : 'production';
 
 const app = express();
 
@@ -13,6 +18,8 @@ app.use(express.json());
 
 app.use(routes.users, userRouter);
 app.use(routes.room, roomRouter);
+
+if (process.env.NODE_ENV === 'develope') app.use('/test', testRouter);
 
 // app.use((req, res, next) => {
 //   const error = `${req.method} ${req.url} 라우터가 없습니다.`;
