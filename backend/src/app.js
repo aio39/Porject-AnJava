@@ -23,12 +23,10 @@ app.use(express.json());
 app.use(routes.users, userRouter);
 app.use(routes.room, roomRouter);
 
-if (process.env.NODE_ENV === 'develope') testPatchResetDate();
+// if (process.env.NODE_ENV === 'develope') testPatchResetDate();
 
 async function initReset() {
   try {
-    //  nextResetScheduleData = await getNextResetScheduleData();
-
     nextResetScheduleData = {
       date: new Date(Date.now() + 2000),
       nextResetRoom: [201],
@@ -39,15 +37,9 @@ async function initReset() {
   }
 }
 
-setTimeout(initReset, 2000);
+if (process.env.NODE_ENV === 'develope') setTimeout(initReset, 2000);
 
 if (process.env.NODE_ENV === 'develope') app.use('/test', testRouter);
-
-// app.use((req, res, next) => {
-//   const error = `${req.method} ${req.url} 라우터가 없습니다.`;
-//   res.status(500);
-//   res.send({ error: error });
-// });
 
 // * 잘못 된 라우터에 접근
 app.all('*', (req, res) => {

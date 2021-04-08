@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import { testPatchResetDate } from './helpers/utility';
 
 dotenv.config();
 
@@ -22,3 +23,9 @@ connectToDB();
 // const db = mongoose.connection;
 // db.once('open', handleOpen);
 // db.on('error', setInterval(connectToDB, 3000));
+
+mongoose.connection.on('disconnected', connectToDB);
+// todo db에 연결 && Dev 모드일때 fake db 넣주게 하자 .
+
+if (process.env.NODE_ENV === 'develope')
+  mongoose.connection.on('connected', testPatchResetDate);
