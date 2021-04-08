@@ -1,10 +1,15 @@
 import userModel from '../models/User';
+import jwt from '../helpers/jwt';
 
 export const postLogin = async (req, res) => {
   const {
     body: { userId, password },
   } = req;
-  res.send(await userModel.checkPassword(userId, password));
+  const user = { userId, password };
+  if (await userModel.checkPassword(userId, password)) {
+    const token = await jwt.sign(user);
+    res.status(200).json({ token });
+  }
 };
 
 export const postSign = async (req, res) => {

@@ -23,8 +23,6 @@ app.use(express.json());
 app.use(routes.users, userRouter);
 app.use(routes.room, roomRouter);
 
-// if (process.env.NODE_ENV === 'develope') testPatchResetDate();
-
 async function initReset() {
   try {
     nextResetScheduleData = {

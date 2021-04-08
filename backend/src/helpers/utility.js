@@ -73,9 +73,15 @@ const setResetData = async () => {
 };
 
 export const testPatchResetDate = async () => {
-  const roomNumArr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+  const fakeRoomNumArr = (function (n) {
+    const arr = [];
+    for (let i = 1; i <= n; i++) {
+      arr.push(i);
+    }
+    return arr;
+  })(10);
 
-  for (let roomNum of roomNumArr) {
+  for (let roomNum of fakeRoomNumArr) {
     roomModel
       .findOneAndUpdate(
         { roomNum },

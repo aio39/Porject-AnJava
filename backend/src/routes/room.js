@@ -10,12 +10,13 @@ import {
   getTestResetDateRoom,
   getResetTest,
 } from '../controllers/roomControllers';
+import jwtAuth from '../helpers/jwtAuthMiddle';
 
 const router = Router();
 
 router.get('/resettest', getResetTest);
 router.get('/', getAllRooms);
-router.post('/', postNewRoom);
+router.post('/', jwtAuth.checkToken, postNewRoom);
 router.get(routes.roomOne, getOneRoom);
 router.post(routes.reserveRoom, postReserveRoom);
 router.delete(routes.reserveRoom, deleteReserveRoom);
