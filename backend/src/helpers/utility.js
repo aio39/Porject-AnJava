@@ -3,38 +3,49 @@ import roomModel from '../models/Room';
 import { nextResetScheduleData } from '../app.js';
 import { resetRoomReserve } from '../controllers/roomControllers';
 
-export const timezoneChangeToKR = function (UnchangedDate) {
-  const timezoneOffset = new Date().getTimezoneOffset() * 60000;
-  const changedDate = new Date(UnchangedDate.getTime() - timezoneOffset);
-  return changedDate;
-};
-
 export const getNextResetScheduleData = async () => {
   try {
-    const arr = await roomModel.find({}, 'roomNum resetDate').exec();
-    const arr2 = [];
-    for (const room of arr) {
+    const allRoomArr = await roomModel.find({}, 'roomNum resetDate').exec();
+    // * todo mongo에서 reset date를 가진 방만 받을 수 있지 않나 ?
+    const restructuredRoomArr = [];
+    for (const room of allRoomArr) {
       if (room.resetDate) {
-        arr2.push([room.roomNum, new Date(room.resetDate)]);
+        restructuredRoomArr.push([room.roomNum, new Date(room.resetDate)]);
       }
     }
-    arr2.sort((a, b) => {
+
+    if (restructuredRoomArr.length === 0) return false;
+    if (restructuredRoomArr.length === 1)
+      return {
+        nextResetRoom: [restructuredRoomArr[0][0]],
+        date: restructuredRoomArr[0][1],
+      };
+
+    // todo mongo sort 사용 가능 ?
+    restructuredRoomArr.sort((a, b) => {
       return a[1] - b[1];
     });
-    // .then(docs => console.log(docs))
-    // .catch(err => console.log(err));
-    let count = 1;
-    let nextResetRoom = [];
-    for (let i = 0; i < arr2.length - 1; i++) {
-      const isSameTime = arr2[i][1].getTime() == arr2[i + 1][1].getTime();
-      if (!isSameTime) break;
-      count++;
-    }
-    for (let i = 0; i < count; i++) {
-      nextResetRoom.push(arr2[i][0]);
-    }
 
-    let nextResetScheduleData = { date: arr2[0][1], nextResetRoom };
+    // * 시간 순으로 정렬하고 나서 가장 빠른 리셋이면서 같은 시간을 가진 방을 구하기
+    let countSameDateRoom = 1;
+    let nextResetRoom = [];
+    for (let i = 0; i < restructuredRoomArr.length - 1; i++) {
+      const isSameTime =
+        restructuredRoomArr[i][1].getTime() ==
+        restructuredRoomArr[i + 1][1].getTime();
+      if (!isSameTime) break;
+      countSameDateRoom++;
+    }
+    // *  리셋이 겹치는 방을 하나의 배열로 묶어주기
+    for (let i = 0; i < countSameDateRoom; i++) {
+      nextResetRoom.push(restructuredRoomArr[i][0]);
+    }
+    const resetDate = restructuredRoomArr[0][1];
+
+    let nextResetScheduleData = {
+      date: resetDate,
+      nextResetRoom,
+    };
     console.log(nextResetScheduleData);
     return nextResetScheduleData;
   } catch (error) {
@@ -43,19 +54,24 @@ export const getNextResetScheduleData = async () => {
 };
 
 export const registerResetRoomScheduleJob = () => {
-  const { date, nextResetRoom: roomNumArr } = nextResetScheduleData;
-  console.log(`rRRS Func: ${date}`);
+  console.log(nextResetScheduleData);
+  const { date, nextResetRoom } = nextResetScheduleData;
+  console.log(
+    `registerResetRoomScheduleJob Func: ${date}, nextResetRoom : ${nextResetRoom}`,
+  );
   let jobs = schedule.scheduleJob(date, resetAndRegisterNewReset);
-  console.log(jobs.name);
+  console.log(jobs);
 };
 
-const resetAndRegisterNewReset = async () => {
-  for (const room of nextResetScheduleData.nextResetRoom) {
-    await resetRoomReserve(room);
-  }
+export const resetAndRegisterNewReset = async () => {
+  if (nextResetScheduleData.nextResetRoom.length > 0)
+    for (const room of nextResetScheduleData.nextResetRoom) {
+      await resetRoomReserve(room);
+    }
 
-  await setResetData();
-  if (nextResetScheduleData.date) {
+  const isHaveNextReset = await setResetData();
+  console.log(`다음에 등록할 리셋이 있습니까? ${isHaveNextReset}`);
+  if (isHaveNextReset) {
     console.log('다음 리셋을 등록합니다.');
     registerResetRoomScheduleJob();
   } else {
@@ -65,13 +81,16 @@ const resetAndRegisterNewReset = async () => {
 
 const setResetData = async () => {
   const newData = await getNextResetScheduleData();
+  if (!newData) return false;
   const { date, nextResetRoom } = newData;
-  console.log(newData);
+  // * export로 공유되고 있는 reset data 객체의 정보 갱신.
   nextResetScheduleData.date = date;
   nextResetScheduleData.nextResetRoom = nextResetRoom;
   console.log(`setResetData Func: ${nextResetScheduleData.date}`);
+  return true;
 };
 
+// * test용 dev모드일때만 fake reset data를 넣어줌
 export const testPatchResetDate = async () => {
   const fakeRoomNumArr = (function (n) {
     const arr = [];
@@ -81,13 +100,17 @@ export const testPatchResetDate = async () => {
     return arr;
   })(10);
 
+  let promise;
   for (let roomNum of fakeRoomNumArr) {
-    roomModel
+    promise = roomModel
       .findOneAndUpdate(
         { roomNum },
         { $set: { resetDate: Date.now() + 5000 * roomNum + 5000 } },
       )
       .exec()
-      .then(docs => console.log(`${roomNum}에 fake reset 등록`));
+      .then(docs => console.log(`${roomNum}에 fake reset 등록`))
+      .catch(err => consolo.log(err));
   }
+  console.log('fake reset 등록 후 리셋을 실행');
+  promise.then(() => resetAndRegisterNewReset());
 };

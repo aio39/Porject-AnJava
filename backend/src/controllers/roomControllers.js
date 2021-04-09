@@ -35,6 +35,7 @@ export const resetRoomReserve = async roomNum => {
       { roomNum },
       { $set: { reservedData: [], resetDate: undefined } },
     );
+    console.log(`방 ${roomNum} 리셋됨`);
     return true;
   } catch (error) {
     return error;

@@ -5,11 +5,7 @@ import userRouter from './routes/user';
 import roomRouter from './routes/room';
 import testRouter from './routes/test';
 import { notFoundResponse, unauthorizedResponse } from './helpers/apiResponse';
-import {
-  getNextResetScheduleData,
-  registerResetRoomScheduleJob,
-  testPatchResetDate,
-} from './helpers/utility';
+import { registerResetRoomScheduleJob } from './helpers/utility';
 process.env.NODE_ENV = process.env.NODE_ENV
   ? process.env.NODE_ENV
   : 'production';
@@ -23,19 +19,19 @@ app.use(express.json());
 app.use(routes.users, userRouter);
 app.use(routes.room, roomRouter);
 
-async function initReset() {
-  try {
-    nextResetScheduleData = {
-      date: new Date(Date.now() + 2000),
-      nextResetRoom: [201],
-    };
-    registerResetRoomScheduleJob();
-  } catch (error) {
-    console.log(error);
-  }
-}
+// async function initReset() {
+//   try {
+//     nextResetScheduleData = {
+//       date: new Date(Date.now() + 2000),
+//       nextResetRoom: [201],
+//     };
+//     registerResetRoomScheduleJob();
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
 
-if (process.env.NODE_ENV === 'develope') setTimeout(initReset, 2000);
+// if (process.env.NODE_ENV === 'develope') setTimeout(initReset, 2000);
 
 if (process.env.NODE_ENV === 'develope') app.use('/test', testRouter);
 
@@ -53,5 +49,8 @@ process.on('uncaughtException', err => {
   console.log('uncaughtException' + err);
 });
 
-export let nextResetScheduleData;
+export let nextResetScheduleData = {
+  date: null,
+  nextResetRoom: [],
+};
 export default app;
