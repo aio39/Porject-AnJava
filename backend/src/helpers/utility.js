@@ -10,7 +10,12 @@ export const getNextResetScheduleData = async () => {
     const restructuredRoomArr = [];
     for (const room of allRoomArr) {
       if (room.resetDate) {
-        restructuredRoomArr.push([room.roomNum, new Date(room.resetDate)]);
+        const resetDate = new Date(room.resetDate);
+        if (resetDate <= Date.now()) {
+          resetRoomReserve(room.roomNum);
+        } else {
+          restructuredRoomArr.push([room.roomNum, resetDate]);
+        }
       }
     }
 
@@ -59,8 +64,16 @@ export const registerResetRoomScheduleJob = () => {
   console.log(
     `registerResetRoomScheduleJob Func: ${date}, nextResetRoom : ${nextResetRoom}`,
   );
-  let jobs = schedule.scheduleJob(date, resetAndRegisterNewReset);
-  console.log(jobs);
+  if (date < Date.now()) {
+    console.log(`reset 시간이 현재보다 빠릅니다.
+    reset date: ${date}
+    noe date: ${Date.now()}
+    reset 시간을 다시 등록합니다.`);
+    resetAndRegisterNewReset();
+  } else {
+    let jobs = schedule.scheduleJob(date, resetAndRegisterNewReset);
+    console.log(`jobs time ${jobs.name}`);
+  }
 };
 
 export const resetAndRegisterNewReset = async () => {
@@ -98,7 +111,7 @@ export const testPatchResetDate = async () => {
       arr.push(i);
     }
     return arr;
-  })(10);
+  })(2);
 
   let promise;
   for (let roomNum of fakeRoomNumArr) {
