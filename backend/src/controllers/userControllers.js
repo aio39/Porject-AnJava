@@ -8,8 +8,9 @@ export const postLogin = async (req, res) => {
   const user = { userId, password };
   if (await userModel.checkPassword(userId, password)) {
     const token = await jwt.sign(user);
-    res.status(200).json({ token });
+    res.status(200).json({ token, userId });
   }
+  res.status(403).json({ error: 'password or username wrong' });
 };
 
 export const postSign = async (req, res) => {
