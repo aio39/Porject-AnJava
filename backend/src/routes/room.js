@@ -8,7 +8,7 @@ import {
   deleteReserveRoom,
   patchResetDateRoom,
   getTestResetDateRoom,
-  getResetTest,
+  // getResetTest,
 } from '../controllers/roomControllers';
 import jwtAuth from '../helpers/jwtAuthMiddle';
 
@@ -30,6 +30,6 @@ roomRouter
   .patch(patchResetDateRoom)
   .get(getTestResetDateRoom);
 
-roomRouter.get('/resettest', getResetTest);
+// roomRouter.get('/resettest', getResetTest);
 
 export default roomRouter;

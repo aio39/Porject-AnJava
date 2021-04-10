@@ -1,5 +1,6 @@
 import userModel from '../models/User';
 import jwt from '../helpers/jwt';
+import apiResponse from '../helpers/apiResponse';
 
 export const postLogin = async (req, res) => {
   const {
@@ -8,9 +9,12 @@ export const postLogin = async (req, res) => {
   const user = { userId, password };
   if (await userModel.checkPassword(userId, password)) {
     const token = await jwt.sign(user);
-    res.status(200).json({ token, userId });
+    apiResponse.successResponseWithData(res, `${userId}님 로그인 성공`, {
+      token,
+    });
+  } else {
+    apiResponse.unauthorizedResponse(res, 'password or username wrong');
   }
-  res.status(403).json({ error: 'password or username wrong' });
 };
 
 export const postSign = async (req, res) => {
@@ -25,8 +29,11 @@ export const postSign = async (req, res) => {
     yjuNum,
   );
   if (result.signSuccess) {
-    res.send({ isSuccess: true, errorMsg: result.errorMsg });
+    apiResponse.successCreateResponse(
+      res,
+      `${userId}님의 계정이 생성 되었습니다.`,
+    );
   } else {
-    res.send({ isSuccess: false, errorMsg: result.errorMsg });
+    apiResponse.parmaNotSatisfyResponse(res, result.errorMsg);
   }
 };

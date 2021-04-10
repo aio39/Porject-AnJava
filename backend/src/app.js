@@ -4,8 +4,7 @@ import routes from './routes';
 import userRouter from './routes/user';
 import roomRouter from './routes/room';
 import testRouter from './routes/test';
-import { notFoundResponse, unauthorizedResponse } from './helpers/apiResponse';
-import { registerResetRoomScheduleJob } from './helpers/utility';
+import apiResponse from './helpers/apiResponse';
 
 process.env.NODE_ENV = process.env.NODE_ENV
   ? process.env.NODE_ENV
@@ -24,12 +23,12 @@ app.use(routes.room, roomRouter);
 
 // * 잘못 된 라우터에 접근
 app.all('*', (req, res) => {
-  return notFoundResponse(res, 'Page not found');
+  return apiResponse.notFoundResponse(res, 'Page not found');
 });
 
 app.use((err, req, res, next) => {
   console.error(err);
-  return unauthorizedResponse(res, err.message);
+  return apiResponse.unauthorizedResponse(res, err.message);
 });
 
 process.on('uncaughtException', err => {

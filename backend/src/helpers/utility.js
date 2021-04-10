@@ -3,6 +3,8 @@ import roomModel from '../models/Room';
 import { nextResetScheduleData } from '../app.js';
 import { resetRoomReserve } from '../controllers/roomControllers';
 
+// todo resetRoomReserve 성공 실패 핸들링
+
 export const getNextResetScheduleData = async () => {
   try {
     const allRoomArr = await roomModel.find({}, 'roomNum resetDate').exec();
