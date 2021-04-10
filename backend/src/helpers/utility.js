@@ -113,19 +113,23 @@ export const testPatchResetDate = async () => {
       arr.push(i);
     }
     return arr;
-  })(2);
-
-  let promise;
+  })(1);
+  let count = 0;
+  const promiseArr = [];
   for (let roomNum of fakeRoomNumArr) {
-    promise = roomModel
+    promiseArr[count] = roomModel
       .findOneAndUpdate(
         { roomNum },
         { $set: { resetDate: Date.now() + 5000 * roomNum + 5000 } },
       )
       .exec()
-      .then(docs => console.log(`${roomNum}에 fake reset 등록`))
-      .catch(err => consolo.log(err));
+      .then(docs =>
+        console.log(`${roomNum}번 방에 fake reset 시간을 등록했습니다.`),
+      )
+      .catch(err => console.log(err));
+    count++;
   }
   console.log('fake reset 등록 후 리셋을 실행');
-  promise.then(() => resetAndRegisterNewReset());
+  if (count > 0)
+    promiseArr[promiseArr.length - 1].then(() => resetAndRegisterNewReset());
 };
