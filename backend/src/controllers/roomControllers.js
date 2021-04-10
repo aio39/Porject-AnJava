@@ -221,10 +221,14 @@ export const postReserveRoom = async (req, res) => {
   const {
     body: { userId, roomNum, sitNum },
   } = req;
+  let isReserve;
+  let userObjectId;
+  let isUserHaveReserve;
+
   try {
     // todo exist로 유무 판단?
     //  * 1) 현재 좌석이 예약 되었는지 확인합니다.
-    const isReserve = await roomModel
+    isReserve = await roomModel
       .findOne(
         {
           roomNum,
@@ -234,19 +238,21 @@ export const postReserveRoom = async (req, res) => {
         },
       )
       .then(docs => {
-        if (docs.reservedData.length > 0) return true;
+        if (docs) return true;
         return false;
       });
   } catch (error) {
+    console.error(error);
     return apiResponse.notFoundResponse(res, error.message);
   }
 
   try {
-    const userObjectId = await userModel
+    userObjectId = await userModel
       .findOne({ userId })
       .exec()
       .then(user => user._id);
   } catch (error) {
+    console.error(error);
     return apiResponse.notFoundResponse(
       res,
       `${userId}님은 존재하지 않습니다.`,
@@ -254,7 +260,7 @@ export const postReserveRoom = async (req, res) => {
   }
 
   try {
-    const isUserHaveReserve = await roomModel
+    isUserHaveReserve = await roomModel
       .exists({
         roomNum,
         'reservedData.user': userObjectId,
@@ -264,6 +270,7 @@ export const postReserveRoom = async (req, res) => {
         return false;
       });
   } catch (error) {
+    console.error(error);
     return apiResponse.notFoundResponse(res, error);
   }
 
@@ -279,22 +286,18 @@ export const postReserveRoom = async (req, res) => {
     );
   } else {
     try {
-      // const userData = await userModel.findOne().where('userId').equals(userId);
-      await roomModel
+      // const userData = await .findOne().where('userId').equals(userId);
+      const updateResult = await roomModel
         .updateOne(
           { roomNum },
           { $addToSet: { reservedData: [{ sitNum, user: userObjectId }] } },
         )
         .exec();
-
-      // function (err, model) {
-      //   if (err) {
-      //     res.send({ isSuccess: false, errMsg: '에러가 발생했습니다.' });
-      //     return;
-      //   }
-      //   res.send({ isSuccess: true, errMsg: '' });
-      // },
-
+      if (updateResult.nModified === 0)
+        return apiResponse.notFoundResponse(
+          res,
+          `${roomNum}가 존재하지 않아 예약에 실패 했습니다.`,
+        );
       return apiResponse.successCreateResponse(res, '예약이 성공 했습니다.');
     } catch (error) {
       return apiResponse.notFoundResponse(res, error);
