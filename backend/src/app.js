@@ -6,34 +6,21 @@ import roomRouter from './routes/room';
 import testRouter from './routes/test';
 import { notFoundResponse, unauthorizedResponse } from './helpers/apiResponse';
 import { registerResetRoomScheduleJob } from './helpers/utility';
+
 process.env.NODE_ENV = process.env.NODE_ENV
   ? process.env.NODE_ENV
   : 'production';
 
 const app = express();
 
-app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-
+if (process.env.NODE_ENV === 'develope') {
+  app.use(morgan('dev'));
+  app.use('/test', testRouter);
+}
 app.use(routes.users, userRouter);
 app.use(routes.room, roomRouter);
-
-// async function initReset() {
-//   try {
-//     nextResetScheduleData = {
-//       date: new Date(Date.now() + 2000),
-//       nextResetRoom: [201],
-//     };
-//     registerResetRoomScheduleJob();
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
-
-// if (process.env.NODE_ENV === 'develope') setTimeout(initReset, 2000);
-
-if (process.env.NODE_ENV === 'develope') app.use('/test', testRouter);
 
 // * 잘못 된 라우터에 접근
 app.all('*', (req, res) => {
@@ -53,4 +40,5 @@ export let nextResetScheduleData = {
   date: null,
   nextResetRoom: [],
 };
+
 export default app;

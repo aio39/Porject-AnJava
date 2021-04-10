@@ -43,6 +43,12 @@
 - [ ] restful하게 리팩토링
 - [ ] http status 지정
 
+## Refactoring
+
+- [ ] consol.log -> debug
+- [ ] router method 하나로 묶어주기
+- [ ] http status 넣기
+
 ## DEPLOY
 
 - [x] Nas의 Docker에 올리기
