@@ -5,8 +5,8 @@ import routes from '../routes';
 
 const userRouter = Router();
 
-userRouter.post('/', postLogin);
+userRouter.route('/').post(postLogin);
 
-userRouter.post(routes.userSign, postSign);
+userRouter.route(routes.userSign).post(postSign);
 
 export default userRouter;

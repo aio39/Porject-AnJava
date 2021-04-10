@@ -12,15 +12,24 @@ import {
 } from '../controllers/roomControllers';
 import jwtAuth from '../helpers/jwtAuthMiddle';
 
-const router = Router();
+const roomRouter = Router();
 
-router.get('/resettest', getResetTest);
-router.get('/', getAllRooms);
-router.post('/', jwtAuth.checkToken, postNewRoom);
-router.get(routes.roomOne, getOneRoom);
-router.post(routes.reserveRoom, postReserveRoom);
-router.delete(routes.reserveRoom, deleteReserveRoom);
-router.patch(routes.resetDateRoom, patchResetDateRoom);
-router.get(routes.resetDateRoom, getTestResetDateRoom);
+roomRouter.route('/').get(getAllRooms).post(jwtAuth.checkToken, postNewRoom);
 
-export default router;
+roomRouter.route(routes.roomOne).get(getOneRoom);
+
+// * 방 에약 관련 라우터
+roomRouter
+  .route(routes.reserveRoom)
+  .post(postReserveRoom)
+  .delete(deleteReserveRoom);
+
+// * 방 리셋 관련 라우터
+roomRouter
+  .route(routes.resetDateRoom)
+  .patch(patchResetDateRoom)
+  .get(getTestResetDateRoom);
+
+roomRouter.get('/resettest', getResetTest);
+
+export default roomRouter;
