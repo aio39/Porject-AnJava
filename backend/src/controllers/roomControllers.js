@@ -90,7 +90,7 @@ export const getTestResetDateRoom = async (req, res) => {
 
 export const getAllRooms = async (req, res) => {
   try {
-    const rooms = roomModel.find({}).exec();
+    const rooms = await roomModel.find({}).exec();
 
     const roomsData = rooms.map(room => {
       const { roomNum } = room;
@@ -101,6 +101,7 @@ export const getAllRooms = async (req, res) => {
       roomsData,
     });
   } catch (error) {
+    console.error(error);
     return apiResponse.notFoundResponse(res, error);
   }
 };
