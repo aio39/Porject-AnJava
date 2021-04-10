@@ -32,7 +32,7 @@ const createNewSitData = (
 
 export const resetRoomReserve = async roomNum => {
   try {
-    const res = await roomModel.updateOne(
+    await roomModel.updateOne(
       { roomNum },
       { $set: { reservedData: [], resetDate: undefined } },
     );
@@ -138,10 +138,11 @@ export const getOneRoom = async (req, res) => {
       reservedData: newSitData,
     };
 
-    return apiResponse.successResponseWithData(res, `${roomNum} 방의 정보`, {
+    return apiResponse.successResponseWithData(res, `${id} 방의 정보`, {
       roomData,
     });
   } catch (error) {
+    console.error(error);
     return apiResponse.notFoundResponse(res, error);
   }
 };
