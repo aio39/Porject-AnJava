@@ -229,15 +229,12 @@ export const postReserveRoom = async (req, res) => {
     // todo exist로 유무 판단?
     //  * 1) 현재 좌석이 예약 되었는지 확인합니다.
     isReserve = await roomModel
-      .findOne(
-        {
-          roomNum,
-        },
-        {
-          reservedData: { $elemMatch: { sitNum } },
-        },
-      )
+      .exists({
+        roomNum,
+        reservedData: { $elemMatch: { sitNum } },
+      })
       .then(docs => {
+        console.log(docs);
         if (docs) return true;
         return false;
       });
@@ -250,7 +247,9 @@ export const postReserveRoom = async (req, res) => {
     userObjectId = await userModel
       .findOne({ userId })
       .exec()
-      .then(user => user._id);
+      .then(user => {
+        return user._id;
+      });
   } catch (error) {
     console.error(error);
     return apiResponse.notFoundResponse(
@@ -274,7 +273,10 @@ export const postReserveRoom = async (req, res) => {
     return apiResponse.notFoundResponse(res, error);
   }
 
+  console.log(isReserve, userObjectId, isUserHaveReserve);
+
   if (isReserve) {
+    console.log(isReserve);
     return apiResponse.notFoundResponse(
       res,
       `${sitNum}번 좌석은 이미 예약된 좌석 입니다.`,
