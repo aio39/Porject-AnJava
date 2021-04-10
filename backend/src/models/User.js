@@ -2,7 +2,8 @@
 /* eslint-disable no-console */
 import mongoose from 'mongoose';
 import CryptoJS from 'crypto-js';
-import validator from 'validator';
+
+const emailRegexp = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
 const UserSchema = new mongoose.Schema({
   userId: {
@@ -31,6 +32,8 @@ const UserSchema = new mongoose.Schema({
     },
   ],
 });
+
+UserSchema.pre;
 
 UserSchema.statics.checkUnique = async function (key, value) {
   const isUnique = await this.findOne({ [key]: value }, (err, docs) => {
@@ -63,7 +66,7 @@ UserSchema.statics.createAccount = async function (
       that.checkUnique('yjuNum', yjuNum),
       that.handlePassword(password),
     ]).then(results => {
-      if (!validator.isEmail(email)) {
+      if (!emailRegexp.test(email)) {
         signSuccess = false;
         errorMsg += '이메일 형식이 옳바르지 않습니다.';
       }
