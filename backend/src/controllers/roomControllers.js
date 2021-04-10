@@ -171,7 +171,6 @@ export const deleteReserveRoom = async (req, res) => {
   const {
     body: { userId, roomNum, sitNum },
   } = req;
-  // let userObjectId;
 
   try {
     const userObjectId = await userModel
@@ -181,7 +180,6 @@ export const deleteReserveRoom = async (req, res) => {
       .catch(err => {
         throw new Error('유저가 존재하지 않습니다.');
       });
-    // .then(user => (userObjectId = user._id));
 
     const isReserve = await roomModel
       .findOne(
@@ -209,10 +207,11 @@ export const deleteReserveRoom = async (req, res) => {
     } else {
       return apiResponse.notFoundResponse(
         res,
-        `${user}님은 ${roomNum} 방의 ${sitNum} 좌석을 예약한 이력이 없습니다.`,
+        `${userId}님은 ${roomNum} 방의 ${sitNum} 좌석을 예약한 이력이 없습니다.`,
       );
     }
   } catch (error) {
+    console.error(error);
     return apiResponse.notFoundResponse(res, error);
   }
 };
