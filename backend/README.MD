@@ -23,6 +23,7 @@
 - [x] 예약 취소 기능 구현
 - [x] 특정 방에대한 예약 데이터 받기
   - [x] 예약 데이터 가공해서 클라이언트에게 보내주기
+- [ ] getRoom return 값 조정
 
 ### 리셋 기능 로직
 
@@ -41,13 +42,12 @@
 
 - [ ] 유저 인증 JWT 방식으로 구현
 - [ ] restful하게 리팩토링
-- [ ] http status 지정
+- [x] http status 지정
 
 ## Refactoring
 
 - [ ] consol.log -> debug
 - [ ] router method 하나로 묶어주기
-- [ ] http status 넣기
 
 ## DEPLOY
 

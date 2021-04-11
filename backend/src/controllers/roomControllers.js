@@ -43,10 +43,7 @@ export const resetRoomReserve = async roomNum => {
   }
 };
 
-// export const getResetTest = async (req, res) => {
-//   resetRoomReserve(201);
-//   res.send('Test');
-// };
+//  *  route controller function
 
 export const patchResetDateRoom = async (req, res) => {
   const {
@@ -88,6 +85,29 @@ export const getTestResetDateRoom = async (req, res) => {
   }
 };
 
+/**
+ * @openapi
+ *  /room:
+ *    get:
+ *      summary: 모든 방의 정보를 조회
+ *      tags:
+ *      - room
+ *      description: 모든 방에 대해 정보를 얻습니다.
+ *      produces:
+ *      - application/json
+ *      parameters:
+ *        - in: query
+ *          name: category
+ *          required: false
+ *          schema:
+ *            type: integer
+ *            description: 카테고리
+ *      responses:
+ *       200:
+ *        description: 모든 방에 대한 정보를 얻었습니다.
+ *       401:
+ *        description: 방이 존재 하지 않습니다.
+ */
 export const getAllRooms = async (req, res) => {
   try {
     const rooms = await roomModel.find({}).exec();
@@ -106,6 +126,26 @@ export const getAllRooms = async (req, res) => {
   }
 };
 
+/**
+ * @openapi
+ *  /room/{roomId}:
+ *    get:
+ *      summary: 방 하나에 대해 상세한 정보를 조회합니다.
+ *      tags:
+ *      - room
+ *      parameters:
+ *        - in: path
+ *          name: roomId
+ *          required: true
+ *          schema:
+ *            type: integer
+ *            description: 조회할 방의 번호 입니다.
+ *      responses:
+ *       200:
+ *        description: 리턴 값입니다.
+ *       404:
+ *        description: 방이 존재 하지 않습니다.
+ */
 export const getOneRoom = async (req, res) => {
   const {
     params: { id },
@@ -148,6 +188,45 @@ export const getOneRoom = async (req, res) => {
   }
 };
 
+/**
+ * @openapi
+ *  /room/:
+ *    get:
+ *      summary: 새로운 방을 하나 만듭니다.
+ *      tags:
+ *      - room
+ *      parameters:
+ *        - in: path
+ *          name: roomId
+ *          required: true
+ *          schema:
+ *            type: integer
+ *            description: 조회할 방의 번호 입니다.
+ *      requestBody:
+ *        description:
+ *        content:
+ *          application/json:
+ *             schema:
+ *              type: object
+ *              properties:
+ *                roomNum:
+ *                  type: number
+ *                column:
+ *                  type: number
+ *                row:
+ *                  type: number
+ *                columnBlankLine:
+ *                  type: number
+ *                rowBlankLine:
+ *                  type: number
+ *                resetDate:
+ *                  type: number
+ *      responses:
+ *       201:
+ *        description: 성공적으로 방이 만들어졌습니다.
+ *       401:
+ *        description: 방을 만드는데 실패했습니다.
+ */
 export const postNewRoom = async (req, res) => {
   const {
     body: { roomNum, column, row, columnBlankLine, rowBlankLine, resetDate },
