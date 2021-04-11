@@ -128,6 +128,20 @@ UserSchema.statics.checkPassword = async function (userId, password) {
   return false;
 };
 
+UserSchema.statics.isAdmin = async function (userId) {
+  let isAdmin;
+  try {
+    isAdmin = await this.findOne({ userId, isAdmin: true }, { isAdmin: true })
+      .exec()
+      .then(docs => (docs ? true : false));
+  } catch (error) {
+    throw error;
+  }
+
+  if (isAdmin) return true;
+  return false;
+};
+
 const userModel = mongoose.model('User', UserSchema);
 
 export default userModel;

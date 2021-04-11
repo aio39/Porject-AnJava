@@ -4,16 +4,23 @@ import apiResponse from '../helpers/apiResponse';
 
 export const postLogin = async (req, res) => {
   const {
-    body: { userId, password, isAdmin },
+    body: { userId, password },
   } = req;
 
-  const user = { userId, password };
-  if (await userModel.checkPassword(userId, password)) {
-    const token = await jwt.sign(user);
-    apiResponse.successResponseWithData(res, `${userId}님 로그인 성공`, {
-      token,
-    });
-  } else {
+  try {
+    const user = { userId, password };
+    if (await userModel.checkPassword(userId, password)) {
+      const token = await jwt.sign(user);
+      const isAdmin = await userModel.isAdmin(userId);
+
+      apiResponse.successResponseWithData(res, `${userId}님 로그인 성공`, {
+        token,
+        isAdmin,
+      });
+    } else {
+      apiResponse.unauthorizedResponse(res, 'password or username wrong');
+    }
+  } catch (error) {
     apiResponse.unauthorizedResponse(res, 'password or username wrong');
   }
 };
