@@ -54,6 +54,7 @@ UserSchema.statics.createAccount = async function (
   password,
   email,
   yjuNum,
+  isAdmin,
 ) {
   let signSuccess = true;
   let errorMsg = '';
@@ -91,7 +92,14 @@ UserSchema.statics.createAccount = async function (
           process.env.CRYPTO_SECRET_KEY,
         ).toString();
         console.log(encryptedPass);
-        that.create({ userId, name, password: encryptedPass, email, yjuNum });
+        that.create({
+          userId,
+          name,
+          password: encryptedPass,
+          email,
+          yjuNum,
+          isAdmin,
+        });
       } catch (error) {
         console.log(`DB 등록에 실패하였습니다. ${error}`);
         errorMsg += '서버에 문제가 있었습니다. 다시 시도해 주십시오.';

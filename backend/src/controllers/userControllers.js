@@ -4,8 +4,9 @@ import apiResponse from '../helpers/apiResponse';
 
 export const postLogin = async (req, res) => {
   const {
-    body: { userId, password },
+    body: { userId, password, isAdmin },
   } = req;
+
   const user = { userId, password };
   if (await userModel.checkPassword(userId, password)) {
     const token = await jwt.sign(user);
@@ -27,6 +28,7 @@ export const postSign = async (req, res) => {
     password,
     email,
     yjuNum,
+    false,
   );
   if (result.signSuccess) {
     apiResponse.successCreateResponse(
