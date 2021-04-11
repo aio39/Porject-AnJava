@@ -1,6 +1,7 @@
 import roomModel from '../models/Room';
 import userModel from '../models/User';
 import apiResponse from '../helpers/apiResponse';
+import { resetAndRegisterNewReset } from '../helpers/utility';
 
 const createNewSitData = (
   sitReserveData,
@@ -56,6 +57,7 @@ export const patchResetDateRoom = async (req, res) => {
       .findOneAndUpdate({ roomNum }, { $set: { resetDate } })
       .exec()
       .then(docs => {
+        resetAndRegisterNewReset();
         return apiResponse.successResponse(
           res,
           `${roomNum} 방에 ${resetDate.toString()} 리셋 시간 등록 성공`,

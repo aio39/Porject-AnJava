@@ -60,6 +60,8 @@ export const getNextResetScheduleData = async () => {
   }
 };
 
+let jobs;
+
 export const registerResetRoomScheduleJob = () => {
   console.log(nextResetScheduleData);
   const { date, nextResetRoom } = nextResetScheduleData;
@@ -73,7 +75,8 @@ export const registerResetRoomScheduleJob = () => {
     reset 시간을 다시 등록합니다.`);
     resetAndRegisterNewReset();
   } else {
-    let jobs = schedule.scheduleJob(date, resetAndRegisterNewReset);
+    if (jobs != undefined) jobs.cancel();
+    jobs = schedule.scheduleJob(date, resetAndRegisterNewReset);
     console.log(`jobs time ${jobs.name}`);
   }
 };
@@ -113,14 +116,14 @@ export const testPatchResetDate = async () => {
       arr.push(i);
     }
     return arr;
-  })(1);
+  })(14);
   let count = 0;
   const promiseArr = [];
   for (let roomNum of fakeRoomNumArr) {
     promiseArr[count] = roomModel
       .findOneAndUpdate(
         { roomNum },
-        { $set: { resetDate: Date.now() + 5000 * roomNum + 5000 } },
+        { $set: { resetDate: Date.now() + 7000 * roomNum + 5000 } },
       )
       .exec()
       .then(docs =>
