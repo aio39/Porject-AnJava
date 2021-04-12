@@ -46,3 +46,40 @@ export const postSign = async (req, res) => {
     apiResponse.parmaNotSatisfyResponse(res, result.errorMsg);
   }
 };
+
+export const getUserDetail = async (req, res) => {
+  const {
+    params: { id },
+  } = req;
+  try {
+    const user = await userModel
+      .findOne(
+        { userId: id },
+        {
+          isAdmin: 1,
+          userId: 1,
+          name: 1,
+          email: 1,
+          yjuNum: 1,
+          'reservedRooms.sitNum': 1,
+          'reservedRooms.roomNum': 1,
+          'reservedRooms.reservedDate': 1,
+        },
+      )
+      .exec()
+      .then(docs => docs);
+    console.log(user);
+    const { isAdmin, userId, name, email, yjuNum, reservedRooms } = user;
+    apiResponse.successResponseWithData(res, `${userId}님의 정보 입니다.`, {
+      isAdmin,
+      userId,
+      name,
+      email,
+      yjuNum,
+      reservedRooms,
+    });
+  } catch (error) {
+    console.error(error);
+    apiResponse.notFoundResponse(res, `정보를 찾지 못 했습니다.`);
+  }
+};

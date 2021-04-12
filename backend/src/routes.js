@@ -16,12 +16,7 @@ const RESETDATE_ROOM = '/:id/reset';
 const routes = {
   users: USERS,
   userSign: USER_SIGN,
-  userDetail: id => {
-    if (id) {
-      return `/users/${id}`;
-    }
-    return USERS_DETAIL;
-  },
+  userDetail: USERS_DETAIL,
   room: ROOM,
   roomOne: ROOM_ONE,
   reserveRoom: RESERVE_ROOM,
