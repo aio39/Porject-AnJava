@@ -160,9 +160,9 @@ export const getOneRoom = async (req, res) => {
       .sort({ 'reservedData.sitNum': 1 })
       .exec();
 
-    const sitReserveData = {};
+    const reservedData = {};
     room.reservedData.forEach(data => {
-      sitReserveData[data.sitNum] = data.user.userId;
+      reservedData[data.sitNum] = data.user.userId;
     });
 
     // const newSitData = createNewSitData(
@@ -182,13 +182,12 @@ export const getOneRoom = async (req, res) => {
     // };
 
     const roomData = {
-      sitReserveData,
       row: room.row,
       column: room.column,
       rowBlankLine: room.rowBlankLine,
       columnBlankLine: room.columnBlankLine,
       resetDate: room.resetDate || '',
-      reservedData: sitReserveData,
+      reservedData,
     };
 
     return apiResponse.successResponseWithData(res, `${id} 방의 정보`, {
