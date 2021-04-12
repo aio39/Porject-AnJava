@@ -63,7 +63,7 @@ export const getUserDetail = async (req, res) => {
           yjuNum: 1,
           'reservedRooms.sitNum': 1,
           'reservedRooms.roomNum': 1,
-          'reservedRooms.reservedDate': 1,
+          'reservedRooms.reserveDate': 1,
         },
       )
       .exec()

@@ -116,7 +116,7 @@ export const testPatchResetDate = async () => {
       arr.push(i);
     }
     return arr;
-  })(14);
+  })(0);
   let count = 0;
   const promiseArr = [];
   for (let roomNum of fakeRoomNumArr) {
