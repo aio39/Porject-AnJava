@@ -3,34 +3,6 @@ import userModel from '../models/User';
 import apiResponse from '../helpers/apiResponse';
 import { resetAndRegisterNewReset } from '../helpers/utility';
 
-const createNewSitData = (
-  sitReserveData,
-  row,
-  column,
-  rowBlankLine,
-  columnBlankLine,
-) => {
-  const rowLength = row + rowBlankLine.length;
-  const columnLength = column + columnBlankLine.length;
-  let sitCount = 1;
-  const newSitData = [];
-  for (let r = 1; r <= rowLength; r++) {
-    for (let c = 1; c <= columnLength; c++) {
-      if (rowBlankLine.includes(r) || columnBlankLine.includes(c)) {
-        newSitData.push({ sitNum: 0, userId: null });
-        continue;
-      }
-      newSitData.push({
-        sitNum: sitCount,
-        userId: sitReserveData[sitCount] || 'yet',
-      });
-      sitCount++;
-      continue;
-    }
-  }
-  return newSitData;
-};
-
 export const resetRoomReserve = async roomNum => {
   try {
     await roomModel.updateOne(
@@ -164,22 +136,6 @@ export const getOneRoom = async (req, res) => {
     room.reservedData.forEach(data => {
       reservedData[data.sitNum] = data.user.userId;
     });
-
-    // const newSitData = createNewSitData(
-    //   sitReserveData,
-    //   room.row,
-    //   room.column,
-    //   room.rowBlankLine,
-    //   room.columnBlankLine,
-    // );
-
-    // const roomData = {
-    //   totalRow: room.totalRow,
-    //   totalColumn: room.totalColumn,
-    //   maxSitIncludeBlank: room.maxSitIncludeBlank,
-    //   resetDate: room.resetDate || '',
-    //   reservedData: newSitData,
-    // };
 
     const roomData = {
       row: room.row,
