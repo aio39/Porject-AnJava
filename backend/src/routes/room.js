@@ -14,10 +14,9 @@ import jwtAuth from '../helpers/jwtAuthMiddle';
 
 const roomRouter = Router();
 
-roomRouter
-  .route('/')
-  .get(getAllRooms)
-  .post(jwtAuth.checkToken, jwtAuth.adminCheck, postNewRoom);
+roomRouter.use(jwtAuth.checkToken);
+
+roomRouter.route('/').get(getAllRooms).post(jwtAuth.adminCheck, postNewRoom);
 
 roomRouter.route(routes.roomOne).get(getOneRoom);
 
@@ -25,14 +24,12 @@ roomRouter.route(routes.roomOne).get(getOneRoom);
 roomRouter
   .route(routes.reserveRoom)
   .post(postReserveRoom)
-  .delete(deleteReserveRoom);
+  .delete(jwtAuth.adminCheck, deleteReserveRoom);
 
 // * 방 리셋 관련 라우터
 roomRouter
   .route(routes.resetDateRoom)
-  .patch(patchResetDateRoom)
+  .patch(jwtAuth.adminCheck, patchResetDateRoom)
   .get(getTestResetDateRoom);
-
-// roomRouter.get('/resettest', getResetTest);
 
 export default roomRouter;

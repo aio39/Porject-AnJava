@@ -7,10 +7,9 @@ const TOKEN_INVALID = -2;
 const jwtAuth = {
   checkToken: async (req, res, next) => {
     var token = req.headers.authorization;
-    console.log(`token:${token}`);
-    if (!token) return res.json({ error: '토큰 에러' });
+    if (!token)
+      return apiResponse.unauthorizedResponse(res, '옳바르지 않은 토큰입니다.');
     const decodedResult = await jwtFunc.verify(token);
-    console.log(decodedResult);
     if (decodedResult === TOKEN_EXPIRED)
       return res.json({ error: '토큰 에러1' });
     if (decodedResult === TOKEN_INVALID)
@@ -23,7 +22,6 @@ const jwtAuth = {
     next();
   },
   adminCheck: (req, res, next) => {
-    console.log(req.body.isAdmin);
     if (req.body.isAdmin) return next();
     return apiResponse.unauthorizedResponse(
       res,
