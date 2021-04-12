@@ -334,17 +334,23 @@ export const postReserveRoom = async (req, res) => {
   } else {
     try {
       // const userData = await .findOne().where('userId').equals(userId);
-      const updateResult = await roomModel
+      const updateRoomResult = await roomModel
         .updateOne(
           { roomNum },
           { $addToSet: { reservedData: [{ sitNum, user: userObjectId }] } },
         )
         .exec();
-      if (updateResult.nModified === 0)
+      console.log(updateRoomResult);
+      if (updateRoomResult.nModified === 0)
         return apiResponse.notFoundResponse(
           res,
           `${roomNum}가 존재하지 않아 예약에 실패 했습니다.`,
         );
+
+      const updateUserResult = await userModel.findByIdAndUpdate(userObjectId, {
+        $addToSet: { reservedRooms: [{ sitNum, roomNum }] },
+      });
+
       return apiResponse.successCreateResponse(res, '예약이 성공 했습니다.');
     } catch (error) {
       return apiResponse.notFoundResponse(res, error);
