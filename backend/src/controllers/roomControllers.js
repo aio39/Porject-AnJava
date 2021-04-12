@@ -249,6 +249,10 @@ export const deleteReserveRoom = async (req, res) => {
         { roomNum },
         { $pull: { reservedData: { sitNum } } },
       );
+      await userModel.updateOne(
+        { userId },
+        { $pull: { reservedRooms: { roomNum } } },
+      );
       return apiResponse.successResponse(res, '성공적으로 취소 했습니다.');
     } else {
       return apiResponse.notFoundResponse(
