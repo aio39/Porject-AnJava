@@ -49,8 +49,8 @@
 
 ## General
 
-- [ ] 유저 인증 JWT 방식으로 구현
-- [ ] restful하게 리팩토링
+- [x] 유저 인증 JWT 방식으로 구현
+- [x] restful하게 리팩토링
 - [x] http status 지정
 
 ## Refactoring

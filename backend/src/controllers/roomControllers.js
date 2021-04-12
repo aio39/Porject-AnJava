@@ -165,20 +165,30 @@ export const getOneRoom = async (req, res) => {
       sitReserveData[data.sitNum] = data.user.userId;
     });
 
-    const newSitData = createNewSitData(
-      sitReserveData,
-      room.row,
-      room.column,
-      room.rowBlankLine,
-      room.columnBlankLine,
-    );
+    // const newSitData = createNewSitData(
+    //   sitReserveData,
+    //   room.row,
+    //   room.column,
+    //   room.rowBlankLine,
+    //   room.columnBlankLine,
+    // );
+
+    // const roomData = {
+    //   totalRow: room.totalRow,
+    //   totalColumn: room.totalColumn,
+    //   maxSitIncludeBlank: room.maxSitIncludeBlank,
+    //   resetDate: room.resetDate || '',
+    //   reservedData: newSitData,
+    // };
 
     const roomData = {
-      totalRow: room.totalRow,
-      totalColumn: room.totalColumn,
-      maxSitIncludeBlank: room.maxSitIncludeBlank,
+      sitReserveData,
+      row: room.row,
+      column: room.column,
+      rowBlankLine: room.rowBlankLine,
+      columnBlankLine: room.columnBlankLine,
       resetDate: room.resetDate || '',
-      reservedData: newSitData,
+      reservedData: sitReserveData,
     };
 
     return apiResponse.successResponseWithData(res, `${id} 방의 정보`, {
