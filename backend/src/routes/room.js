@@ -14,7 +14,10 @@ import jwtAuth from '../helpers/jwtAuthMiddle';
 
 const roomRouter = Router();
 
-roomRouter.route('/').get(getAllRooms).post(jwtAuth.checkToken, postNewRoom);
+roomRouter
+  .route('/')
+  .get(getAllRooms)
+  .post(jwtAuth.checkToken, jwtAuth.adminCheck, postNewRoom);
 
 roomRouter.route(routes.roomOne).get(getOneRoom);
 

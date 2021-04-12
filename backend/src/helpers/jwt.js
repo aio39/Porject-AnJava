@@ -19,6 +19,7 @@ const jwtFunc = {
   sign: async user => {
     const payload = {
       userId: user.userId,
+      isAdmin: user.isAdmin,
     };
     const token = jwt.sign(payload, JWT_SET.secretKey, JWT_SET.options);
     //   refreshToken: randToken.uid(256),

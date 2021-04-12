@@ -8,10 +8,11 @@ export const postLogin = async (req, res) => {
   } = req;
 
   try {
-    const user = { userId, password };
+    const isAdmin = await userModel.isAdmin(userId);
+    console.log(isAdmin);
+    const user = { userId, isAdmin };
     if (await userModel.checkPassword(userId, password)) {
       const token = await jwt.sign(user);
-      const isAdmin = await userModel.isAdmin(userId);
 
       apiResponse.successResponseWithData(res, `${userId}님 로그인 성공`, {
         token,
