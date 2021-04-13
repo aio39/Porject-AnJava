@@ -1,13 +1,26 @@
 import mongoose from 'mongoose';
 
 const RoomSchema = new mongoose.Schema({
-  roomNum: Number,
-  column: Number,
-  row: Number,
+  roomNum: {
+    type: Number,
+    min: 1,
+    max: 10000,
+    unique: true,
+  },
+  column: { type: Number, min: 1, max: 20 },
+  row: { type: Number, min: 1, max: 20 },
   columnBlankLine: [Number],
   rowBlankLine: [Number],
   maxSit: Number,
-  resetDate: Date,
+  resetDate: {
+    type: Date,
+    validate: {
+      validator: function (v) {
+        console.log(this);
+        return new Date(v) > Date.now();
+      },
+    },
+  },
   reservedData: [
     {
       sitNum: Number,
@@ -19,46 +32,6 @@ const RoomSchema = new mongoose.Schema({
   ],
 });
 
-RoomSchema.statics.checkRoomOverlap = async function (roomNum) {
-  const isUnique = await this.findOne({ roomNum }, (err, docs) => {
-    if (err) return err;
-    return docs;
-  });
-  if (isUnique == null) return [true, roomNum];
-  return [false, roomNum];
-};
-
-RoomSchema.statics.createRoom = async function (
-  roomNum,
-  column,
-  row,
-  columnBlankLine = [],
-  rowBlankLine = [],
-  resetDate = null,
-) {
-  const that = this;
-
-  const isSuccess = await this.checkRoomOverlap(roomNum).then(result => {
-    if (result[0] !== true) return [false, '이미 존재합니다.'];
-    try {
-      that.create({
-        roomNum,
-        column,
-        row,
-        columnBlankLine,
-        rowBlankLine,
-        resetDate,
-      });
-      return [true, `${roomNum}방이 만들어 졌습니다.`];
-    } catch (err) {
-      console.log(err);
-      return [false, `에러가 발생 했습니다. ${err}`];
-    }
-  });
-
-  return isSuccess;
-};
-
 RoomSchema.methods.checkReserve = sitNum => {
   this.findOne({ reservedData: [{ sitNum }] }, (err, docs) => {
     if (err) return true;
@@ -66,21 +39,35 @@ RoomSchema.methods.checkReserve = sitNum => {
   });
 };
 
-RoomSchema.virtual('totalRow').get(function () {
-  return this.row + this.rowBlankLine.length;
+RoomSchema.post('save', (error, doc, next) => {
+  console.log('save error');
+  console.log(error.code);
+  if (error.code === 11000) {
+    throw new Error('이 번호의 방이 이미 존재합니다.');
+  } else {
+    next(error);
+  }
 });
 
-RoomSchema.virtual('totalColumn').get(function () {
-  return this.column + this.columnBlankLine.length;
+RoomSchema.pre('validate', function (next) {
+  // * 블랭크가 실제 라인 수 보다 큰지 체크 합니다.
+  if (
+    this.rowBlankLine.length != 0 &&
+    Math.max(...this.rowBlankLine) > this.row
+  ) {
+    console.log('error: 콜롬 블랭크 라인이 콜롬 라인보다 큼.');
+    return next(new Error('콜롬 블랭크 라인은 콜롬 라인보다 클 수 없습니다.'));
+  }
+  if (
+    this.columnBlankLine.length != 0 &&
+    Math.max(...this.columnBlankLine) > this.row
+  ) {
+    console.log('error: 로우 블랭크 라인이 로우 라인보다 큼.');
+    return next(new Error('로우 블랭크 라인은 로우 라인보다 클 수 없습니다.'));
+  }
+  this.maxSit = this.row * this.column;
+  return next();
 });
-
-RoomSchema.virtual('maxSitIncludeBlank').get(function () {
-  return this.totalRow * this.totalColumn;
-});
-
-// RoomSchema.virtual('resetDateKR').get(function () {
-//   return this.resetDate;
-// });
 
 const roomModel = mongoose.model('Room', RoomSchema);
 

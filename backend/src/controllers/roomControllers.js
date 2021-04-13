@@ -26,7 +26,11 @@ export const patchResetDateRoom = async (req, res) => {
 
   try {
     roomModel
-      .findOneAndUpdate({ roomNum }, { $set: { resetDate } })
+      .findOneAndUpdate(
+        { roomNum },
+        { $set: { resetDate } },
+        { runValidators: true, context: 'query' },
+      )
       .exec()
       .then(docs => {
         resetAndRegisterNewReset();
@@ -87,8 +91,12 @@ export const getAllRooms = async (req, res) => {
     const rooms = await roomModel.find({}).exec();
 
     const roomsData = rooms.map(room => {
-      const { roomNum } = room;
-      const maxSit = room.row * room.column;
+      const { roomNum, maxSit } = room;
+      console.log(room);
+      // todo resetDate를 왜 못 읽을까요
+      console.log(typeof room);
+      console.log(room.maxSit);
+      if (room.resetDate) return { roomNum, maxSit, resetDate: room.resetDate };
       return { roomNum, maxSit };
     });
     return apiResponse.successResponseWithData(res, `모든 방 리스트입니다.`, {
@@ -194,22 +202,25 @@ export const getOneRoom = async (req, res) => {
  *       401:
  *        description: 방을 만드는데 실패했습니다.
  */
-export const postNewRoom = async (req, res) => {
+export const postCreateRoom = async (req, res) => {
   const {
     body: { roomNum, column, row, columnBlankLine, rowBlankLine, resetDate },
   } = req;
   try {
-    const result = await roomModel.createRoom(
+    const room = new roomModel({
       roomNum,
       column,
       row,
       columnBlankLine,
       rowBlankLine,
       resetDate,
-    );
-    return apiResponse.successResponse(res, `${roomNum} 방이 만들어 졌습니다.`);
+    });
+    await room.save();
+
+    return apiResponse.successResponse(res, '새로운 방이 만들어졌습니다. ');
   } catch (error) {
-    return apiResponse.parmaNotSatisfyResponse(res, error);
+    console.error(error);
+    return apiResponse.parmaNotSatisfyResponse(res, error.message);
   }
 };
 
@@ -248,10 +259,12 @@ export const deleteReserveRoom = async (req, res) => {
       await roomModel.updateOne(
         { roomNum },
         { $pull: { reservedData: { sitNum } } },
+        { runValidators: true, context: 'query' },
       );
       await userModel.updateOne(
         { userId },
         { $pull: { reservedRooms: { roomNum } } },
+        { runValidators: true, context: 'query' },
       );
       return apiResponse.successResponse(res, '성공적으로 취소 했습니다.');
     } else {
@@ -275,7 +288,6 @@ export const postReserveRoom = async (req, res) => {
   let isUserHaveReserve;
 
   try {
-    // todo exist로 유무 판단?
     //  * 1) 현재 좌석이 예약 되었는지 확인합니다.
     isReserve = await roomModel
       .exists({
@@ -293,6 +305,7 @@ export const postReserveRoom = async (req, res) => {
   }
 
   try {
+    // user가 존재하지는지 확인합니다.
     userObjectId = await userModel
       .findOne({ userId })
       .exec()
@@ -308,6 +321,7 @@ export const postReserveRoom = async (req, res) => {
   }
 
   try {
+    // 해당 유저가 현재 방에서 다른 예약이 있는지 확인 합니다.
     isUserHaveReserve = await roomModel
       .exists({
         roomNum,
@@ -322,7 +336,13 @@ export const postReserveRoom = async (req, res) => {
     return apiResponse.notFoundResponse(res, error);
   }
 
-  console.log(isReserve, userObjectId, isUserHaveReserve);
+  // * MaxSit와 비교 합니다.
+  const { maxSit } = await roomModel.findOne({ roomNum }, 'maxSit').exec();
+  if (maxSit < sitNum)
+    return apiResponse.notFoundResponse(
+      res,
+      `${sitNum}번은 존재하지 않는 좌석입니다.`,
+    );
 
   if (isReserve) {
     console.log(isReserve);
@@ -337,11 +357,12 @@ export const postReserveRoom = async (req, res) => {
     );
   } else {
     try {
-      // const userData = await .findOne().where('userId').equals(userId);
+      // * 방의 예약 정보를 갱신합니다.
       const updateRoomResult = await roomModel
         .updateOne(
           { roomNum },
           { $addToSet: { reservedData: [{ sitNum, user: userObjectId }] } },
+          { runValidators: true, context: 'query' },
         )
         .exec();
       console.log(updateRoomResult);
@@ -350,10 +371,14 @@ export const postReserveRoom = async (req, res) => {
           res,
           `${roomNum}가 존재하지 않아 예약에 실패 했습니다.`,
         );
-
-      const updateUserResult = await userModel.findByIdAndUpdate(userObjectId, {
-        $addToSet: { reservedRooms: [{ sitNum, roomNum }] },
-      });
+      // * 유저의 예약 정보를 갱신합니다.
+      const updateUserResult = await userModel.findByIdAndUpdate(
+        userObjectId,
+        {
+          $addToSet: { reservedRooms: [{ sitNum, roomNum }] },
+        },
+        { runValidators: true, context: 'query' },
+      );
 
       return apiResponse.successCreateResponse(res, '예약이 성공 했습니다.');
     } catch (error) {

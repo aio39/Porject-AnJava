@@ -35,8 +35,9 @@ app.all('*', (req, res) => {
 });
 
 app.use((err, req, res, next) => {
+  console.log('----------------------------------------');
   console.error(err);
-  return apiResponse.unauthorizedResponse(res, err.message);
+  return apiResponse.unauthorizedResponse(res, err.message || 'error');
 });
 
 process.on('uncaughtException', err => {

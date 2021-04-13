@@ -2,7 +2,7 @@ import { Router } from 'express';
 import routes from '../routes';
 import {
   getAllRooms,
-  postNewRoom,
+  postCreateRoom,
   getOneRoom,
   postReserveRoom,
   deleteReserveRoom,
@@ -16,7 +16,7 @@ const roomRouter = Router();
 
 roomRouter.use(jwtAuth.checkToken);
 
-roomRouter.route('/').get(getAllRooms).post(jwtAuth.adminCheck, postNewRoom);
+roomRouter.route('/').get(getAllRooms).post(jwtAuth.adminCheck, postCreateRoom);
 
 roomRouter.route(routes.roomOne).get(getOneRoom);
 
