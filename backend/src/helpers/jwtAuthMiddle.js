@@ -19,7 +19,10 @@ const jwtAuth = {
     console.log(decodedResult);
     if (decodedResult.isAdmin) {
       req.body.isAdmin = true;
-      // req.body.userId는 body의 데이터 사용.
+      // req.body.userId는 body의 데이터 사용, userId가 없다면 Admin 아이디
+      if (!req.body.userId) {
+        req.body.userId = decodedResult.userId;
+      }
     } else {
       req.body.userId = decodedResult.userId;
       req.body.isAdmin = false;
