@@ -55,6 +55,9 @@ export const getUserDetail = async (req, res) => {
   const {
     params: { id },
   } = req;
+  if (!req.body.isAdmin && id !== req.body.userId)
+    return apiResponse.unauthorizedResponse(res, '권한이 없습니다.');
+
   try {
     const user = await userModel
       .findOne(
