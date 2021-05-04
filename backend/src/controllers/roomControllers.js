@@ -6,6 +6,7 @@ import { resetAndRegisterNewReset } from '../helpers/utility';
 // * function
 export const resetRoomReserve = async roomNum => {
   try {
+    await resetUsersRoomReserve(roomNum);
     await roomModel.updateOne(
       { roomNum },
       { $set: { reservedData: [], resetDate: undefined } },
@@ -13,6 +14,31 @@ export const resetRoomReserve = async roomNum => {
     console.log(`방 ${roomNum} 리셋됨`);
     return true;
   } catch (error) {
+    return false;
+  }
+};
+
+export const resetUsersRoomReserve = async roomNum => {
+  try {
+    const { reservedData } = await roomModel
+      .findOne({ roomNum }, 'reserveData')
+      .populate('reservedData.user', 'userId')
+      .exec();
+    if (reservedData.length > 0)
+      await Promise.all(
+        reservedData.forEach(async a => {
+          const result = await userModel
+            .updateOne(
+              { _id: a.user._id },
+              { $pull: { reservedRooms: { roomNum } } },
+            )
+            .exec();
+        }),
+      );
+
+    return true;
+  } catch (error) {
+    console.error(error);
     return false;
   }
 };
@@ -98,7 +124,18 @@ export const getOneRoom = async (req, res) => {
 
 export const patchRoom = async (req, res) => {};
 
-export const deleteRoom = async (req, res) => {};
+export const deleteRoom = async (req, res) => {
+  const {
+    params: { id: roomNum },
+  } = req;
+  try {
+    await resetUsersRoomReserve(roomNum);
+    await roomModel.findOneAndDelete({ roomNum }).exec();
+    return apiResponse.successResponse(res, '방과 유저들의 예약 초기화 성공');
+  } catch (error) {
+    return apiResponse.notFoundResponse(res, error.message);
+  }
+};
 
 // * 방 에약 관련 라우터
 export const postReserveRoom = async (req, res) => {
