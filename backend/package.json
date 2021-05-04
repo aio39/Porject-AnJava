@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node --experimental-modules --es-module-specifier-resolution=node  src/init.js",
-    "dev": "cross-env NODE_ENV=develope  nodemon  --inspect --experimental-modules --es-module-specifier-resolution=node src/init.js",
+    "dev": "cross-env NODE_ENV=develope  nodemon  --delay 1500ms --inspect --experimental-modules --es-module-specifier-resolution=node src/init.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

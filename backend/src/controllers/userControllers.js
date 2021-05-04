@@ -2,6 +2,7 @@ import userModel from '../models/User';
 import jwt from '../helpers/jwt';
 import apiResponse from '../helpers/apiResponse';
 
+// * 회원 가입
 export const postLogin = async (req, res) => {
   const {
     body: { userId, password },
@@ -26,6 +27,7 @@ export const postLogin = async (req, res) => {
   }
 };
 
+// * 로그인
 export const postSign = async (req, res) => {
   const {
     body: { userId, name, password, email, yjuNum },
@@ -48,6 +50,7 @@ export const postSign = async (req, res) => {
   }
 };
 
+// * 현재 유저의 정보와 예약 정보 등
 export const getUserDetail = async (req, res) => {
   const {
     params: { id },
@@ -84,3 +87,7 @@ export const getUserDetail = async (req, res) => {
     apiResponse.notFoundResponse(res, `정보를 찾지 못 했습니다.`);
   }
 };
+
+export const patchUser = async (req, res) => {};
+
+export const deleteUser = async (req, res) => {};

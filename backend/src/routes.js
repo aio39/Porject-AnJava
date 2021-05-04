@@ -3,7 +3,7 @@
 // Users
 const USERS = '/users';
 const USER_SIGN = '/sign';
-const USERS_DETAIL = '/:id';
+const USER = '/:id';
 
 // Room
 const ROOM = '/room';
@@ -16,7 +16,7 @@ const RESETDATE_ROOM = '/:id/reset';
 const routes = {
   users: USERS,
   userSign: USER_SIGN,
-  userDetail: USERS_DETAIL,
+  user: USER,
   room: ROOM,
   roomOne: ROOM_ONE,
   reserveRoom: RESERVE_ROOM,
