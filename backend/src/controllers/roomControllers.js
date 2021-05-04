@@ -103,8 +103,10 @@ export const deleteRoom = async (req, res) => {};
 // * 방 에약 관련 라우터
 export const postReserveRoom = async (req, res) => {
   const {
-    body: { userId, roomNum, sitNum },
+    body: { userId, sitNum },
+    params: { id: roomNum },
   } = req;
+
   let isReserve;
   let userObjectId;
   let isUserHaveReserve;
@@ -211,7 +213,8 @@ export const postReserveRoom = async (req, res) => {
 
 export const deleteReserveRoom = async (req, res) => {
   const {
-    body: { userId, roomNum, sitNum },
+    body: { userId, sitNum },
+    params: { id },
   } = req;
 
   try {
