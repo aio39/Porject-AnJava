@@ -6,7 +6,7 @@ const TOKEN_INVALID = -2;
 
 const jwtAuth = {
   checkToken: async (req, res, next) => {
-    var token = req.headers.authorization;
+    var token = req.headers.authorization; // req의 헤더 가져오기
     if (!token)
       return apiResponse.unauthorizedResponse(res, '옳바르지 않은 토큰입니다.');
     const decodedResult = await jwtFunc.verify(token);
@@ -17,8 +17,13 @@ const jwtAuth = {
     if (decodedResult.userId === undefined)
       return res.json({ error: '토큰 에러3' });
     console.log(decodedResult);
-    req.body.userId = decodedResult.userId;
-    req.body.isAdmin = decodedResult.isAdmin;
+    if (decodedResult.isAdmin) {
+      req.body.isAdmin = true;
+      // req.body.userId는 body의 데이터 사용.
+    } else {
+      req.body.userId = decodedResult.userId;
+      req.body.isAdmin = false;
+    }
     next();
   },
   adminCheck: (req, res, next) => {
