@@ -8,10 +8,8 @@ import {
   deleteReserveRoom,
   patchResetDateRoom,
   getTestResetDateRoom,
-  deleteResetDateRoom,
   deleteRoom,
   patchRoom,
-  // getResetTest,
 } from '../controllers/roomControllers';
 import jwtAuth from '../helpers/jwtAuthMiddle';
 
@@ -30,7 +28,7 @@ roomRouter
   .route(routes.roomOne)
   .get(getOneRoom)
   .patch(jwtAuth.adminCheck, patchRoom) // todo
-  .delete(jwtAuth.adminCheck, deleteRoom); // todo;
+  .delete(jwtAuth.adminCheck, deleteRoom);
 
 // * 방 에약 관련 라우터
 roomRouter
@@ -42,7 +40,6 @@ roomRouter
 roomRouter
   .route(routes.resetDateRoom)
   .patch(jwtAuth.adminCheck, patchResetDateRoom)
-  .delete(jwtAuth.adminCheck, deleteResetDateRoom) // todo
   .get(getTestResetDateRoom);
 
 export default roomRouter;

@@ -82,7 +82,11 @@ export const registerResetRoomScheduleJob = () => {
 };
 
 export const resetAndRegisterNewReset = async () => {
-  if (nextResetScheduleData.nextResetRoom.length > 0)
+  console.log(nextResetScheduleData < Date.now());
+  if (
+    nextResetScheduleData < Date.now() &&
+    nextResetScheduleData.nextResetRoom.length > 0
+  )
     for (const room of nextResetScheduleData.nextResetRoom) {
       await resetRoomReserve(room);
     }
@@ -133,6 +137,9 @@ export const testPatchResetDate = async () => {
     count++;
   }
   console.log('fake reset 등록 후 리셋을 실행');
-  if (count > 0)
+  if (count > 0) {
     promiseArr[promiseArr.length - 1].then(() => resetAndRegisterNewReset());
+  } else {
+    resetAndRegisterNewReset();
+  }
 };

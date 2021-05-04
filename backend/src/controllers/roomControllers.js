@@ -307,31 +307,40 @@ export const deleteReserveRoom = async (req, res) => {
 // * 방 리셋 관련 라우터
 export const patchResetDateRoom = async (req, res) => {
   const {
-    body: { resetDate: resetDateString, roomNum },
+    body: { resetDate: resetDateString },
+    params: { id: roomNum },
   } = req;
-  const resetDate = new Date(resetDateString);
-
   try {
-    roomModel
-      .findOneAndUpdate(
-        { roomNum },
-        { $set: { resetDate } },
-        { runValidators: true, context: 'query' },
-      )
-      .exec()
-      .then(docs => {
-        resetAndRegisterNewReset();
-        return apiResponse.successResponse(
-          res,
-          `${roomNum} 방에 ${resetDate.toString()} 리셋 시간 등록 성공`,
-        );
-      });
+    if (resetDateString) {
+      const resetDate = new Date(resetDateString);
+      await roomModel
+        .findOneAndUpdate(
+          { roomNum },
+          { $set: { resetDate } },
+          { runValidators: true, context: 'query' },
+        )
+        .exec();
+      apiResponse.successResponse(
+        res,
+        `${roomNum} 방에 ${resetDate.toString()} 리셋 시간 등록 성공`,
+      );
+    } else {
+      await roomModel
+        .findOneAndUpdate(
+          { roomNum },
+          { $unset: { resetDate: '' } },
+          { runValidators: true, context: 'query' },
+        )
+        .exec();
+      apiResponse.successResponse(res, `${roomNum} 방의 리셋 시간 삭제됨.`);
+    }
+
+    resetAndRegisterNewReset();
+    return;
   } catch (error) {
     return apiResponse.parmaNotSatisfyResponse(res, error);
   }
 };
-
-export const deleteResetDateRoom = async (req, res) => {};
 
 export const getTestResetDateRoom = async (req, res) => {
   const {
