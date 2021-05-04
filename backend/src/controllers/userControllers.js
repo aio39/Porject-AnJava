@@ -95,8 +95,11 @@ export const patchUser = async (req, res) => {};
 
 export const deleteUser = async (req, res) => {
   const {
-    params: { id: userId },
+    params: { id },
   } = req;
+  if (!req.body.isAdmin && id !== req.body.userId)
+    return apiResponse.unauthorizedResponse(res, '권한이 없습니다.');
+
   try {
     await userModel.deleteOne({ userId });
   } catch (error) {
