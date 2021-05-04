@@ -4,6 +4,8 @@ import {
   postLogin,
   postSign,
   getUserDetail,
+  patchUser,
+  deleteUser,
 } from '../controllers/userControllers';
 import routes from '../routes';
 import jwtAuth from '../helpers/jwtAuthMiddle';
@@ -20,7 +22,7 @@ userRouter.route(routes.userSign).post(postSign);
 userRouter
   .route(routes.user)
   .get(jwtAuth.checkToken, getUserDetail)
-  .patch(jwtAuth.checkToken, patchUser)
-  .delete(jwtAuth.checkToken, deleteUser);
+  .patch(jwtAuth.checkToken, patchUser) // todo
+  .delete(jwtAuth.checkToken, deleteUser); // todo
 
 export default userRouter;

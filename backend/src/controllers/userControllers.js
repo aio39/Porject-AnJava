@@ -90,4 +90,17 @@ export const getUserDetail = async (req, res) => {
 
 export const patchUser = async (req, res) => {};
 
-export const deleteUser = async (req, res) => {};
+export const deleteUser = async (req, res) => {
+  const {
+    params: { id: userId },
+  } = req;
+  try {
+    await userModel.deleteOne({ userId });
+  } catch (error) {
+    console.error(error);
+
+    return apiResponse.notFoundResponse(res, `${userId}를 찾지 못 했습니다`);
+  }
+
+  return apiResponse.successResponse(res, `${userId}가 삭제되었습니다.`);
+};
