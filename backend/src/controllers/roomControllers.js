@@ -251,52 +251,85 @@ export const postReserveRoom = async (req, res) => {
 export const deleteReserveRoom = async (req, res) => {
   const {
     body: { userId, sitNum },
-    params: { id },
+    params: { id: roomNum },
   } = req;
 
   try {
-    const userObjectId = await userModel
-      .findOne({ userId })
-      .exec()
-      .then(user => user._id)
-      .catch(err => {
-        throw new Error('유저가 존재하지 않습니다.');
-      });
-
-    const isReserve = await roomModel
-      .findOne(
-        {
-          roomNum,
-          'reservedData.user': userObjectId,
-          'reservedData.sitNum': sitNum,
-        },
-        {
-          reservedData: { $elemMatch: { sitNum } },
-        },
-      )
-      .exec()
-      .then(docs => {
-        if (docs) return true;
-        return false;
-      });
-
-    if (isReserve) {
-      await roomModel.updateOne(
-        { roomNum },
-        { $pull: { reservedData: { sitNum } } },
-        { runValidators: true, context: 'query' },
-      );
-      await userModel.updateOne(
-        { userId },
-        { $pull: { reservedRooms: { roomNum } } },
-        { runValidators: true, context: 'query' },
-      );
-      return apiResponse.successResponse(res, '성공적으로 취소 했습니다.');
+    if (sitNum) {
+      const isReserve = await roomModel
+        .findOne(
+          {
+            roomNum,
+            'reservedData.sitNum': sitNum,
+          },
+          {
+            reservedData: { $elemMatch: { sitNum } },
+          },
+        )
+        .exec()
+        .then(docs => {
+          if (docs) return true;
+          return false;
+        });
+      if (isReserve) {
+        await roomModel.updateOne(
+          { roomNum },
+          { $pull: { reservedData: { sitNum } } },
+          { runValidators: true, context: 'query' },
+        );
+        await userModel.updateOne(
+          { userId },
+          { $pull: { reservedRooms: { roomNum } } },
+          { runValidators: true, context: 'query' },
+        );
+        return apiResponse.successResponse(res, '성공적으로 취소 했습니다.');
+      } else {
+        return apiResponse.notFoundResponse(
+          res,
+          `${roomNum} 방의 ${sitNum} 좌석을 예약한 이력이 없습니다.`,
+        );
+      }
     } else {
-      return apiResponse.notFoundResponse(
-        res,
-        `${userId}님은 ${roomNum} 방의 ${sitNum} 좌석을 예약한 이력이 없습니다.`,
-      );
+      const userObjectId = await userModel
+        .findOne({ userId })
+        .exec()
+        .then(user => user._id)
+        .catch(err => {
+          throw new Error('유저가 존재하지 않습니다.');
+        });
+      const isReserve = await roomModel
+        .findOne(
+          {
+            roomNum,
+            'reservedData.user': userObjectId,
+          },
+          {
+            reservedData: { $elemMatch: { user: userObjectId } },
+          },
+        )
+        .exec()
+        .then(docs => {
+          if (docs) return true;
+          return false;
+        });
+      if (isReserve) {
+        await roomModel.updateOne(
+          { roomNum },
+          { $pull: { reservedData: { user: userObjectId } } },
+          { runValidators: true, context: 'query' },
+        );
+        await userModel.updateOne(
+          { userId },
+          { $pull: { reservedRooms: { roomNum } } },
+          { runValidators: true, context: 'query' },
+        );
+        return apiResponse.successResponse(res, '성공적으로 취소 했습니다.');
+      } else {
+        return apiResponse.notFoundResponse(
+          res,
+          `${userId}님은 ${roomNum} 방의 좌석을 예약한 이력이 없습니다.`,
+        );
+      }
     }
   } catch (error) {
     console.error(error);

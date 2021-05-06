@@ -24,6 +24,7 @@ if (process.env.NODE_ENV === 'develope') {
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+app.use('/test', testRouter);
 app.use(routes.users, userRouter);
 app.use(routes.room, roomRouter);
 
