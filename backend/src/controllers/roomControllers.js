@@ -45,17 +45,28 @@ export const resetUsersRoomReserve = async roomNum => {
 
 // * 방 CRUD
 export const getAllRooms = async (req, res) => {
+  const {
+    body: { userId },
+  } = req;
+
   try {
     const rooms = await roomModel.find({}).exec();
+    const { _id: user_id } = await userModel.findOne({ userId }, '_id').exec();
 
     const roomsData = rooms.map(room => {
-      const { roomNum, maxSit } = room;
-      console.log(room);
-      // todo resetDate를 왜 못 읽을까요
-      console.log(typeof room);
-      console.log(room.maxSit);
-      if (room.resetDate) return { roomNum, maxSit, resetDate: room.resetDate };
-      return { roomNum, maxSit };
+      const { roomNum, maxSit, resetDate, reservedData } = room;
+      const remainSit = maxSit - reservedData.length;
+      let isUserIncluded;
+      if (
+        reservedData.find(reserve => {
+          return reserve.user.toString() === user_id.toString();
+        })
+      ) {
+        isUserIncluded = true;
+      } else {
+        isUserIncluded = false;
+      }
+      return { roomNum, maxSit, resetDate, remainSit, isUserIncluded };
     });
     return apiResponse.successResponseWithData(res, `모든 방 리스트입니다.`, {
       roomsData,
