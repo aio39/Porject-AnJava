@@ -115,12 +115,16 @@ export const getOneRoom = async (req, res) => {
       reservedData[data.sitNum] = data.user.userId;
     });
 
+    const remainSit = room.maxSit - room.reservedData.length;
+
     const roomData = {
       row: room.row,
       column: room.column,
       rowBlankLine: room.rowBlankLine,
       columnBlankLine: room.columnBlankLine,
       resetDate: room.resetDate || '',
+      maxSit: room.maxSit,
+      remainSit,
       reservedData,
     };
 
