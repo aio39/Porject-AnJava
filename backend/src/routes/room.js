@@ -12,6 +12,7 @@ import {
   patchRoom,
 } from '../controllers/roomControllers';
 import jwtAuth from '../helpers/jwtAuthMiddle';
+import { checkIsRoom } from '../helpers/middleware';
 
 const roomRouter = Router();
 
@@ -26,6 +27,7 @@ roomRouter
 
 roomRouter
   .route(routes.roomOne)
+  .all(checkIsRoom)
   .get(getOneRoom)
   .patch(jwtAuth.adminCheck, patchRoom) // todo
   .delete(jwtAuth.adminCheck, deleteRoom);
@@ -33,12 +35,14 @@ roomRouter
 // * 방 에약 관련 라우터
 roomRouter
   .route(routes.reserveRoom)
+  .all(checkIsRoom)
   .post(postReserveRoom)
   .delete(deleteReserveRoom);
 
 // * 방 리셋 관련 라우터
 roomRouter
   .route(routes.resetDateRoom)
+  .all(checkIsRoom)
   .patch(jwtAuth.adminCheck, patchResetDateRoom)
   .get(getTestResetDateRoom);
 
