@@ -77,17 +77,10 @@ export const getAllRooms = async (req, res) => {
   }
 };
 export const postCreateRoom = async (req, res) => {
-  const {
-    body: { roomNum, column, row, columnBlankLine, rowBlankLine, resetDate },
-  } = req;
+  const { body } = req;
   try {
     const room = new roomModel({
-      roomNum,
-      column,
-      row,
-      columnBlankLine,
-      rowBlankLine,
-      resetDate,
+      ...body,
     });
     await room.save();
 
