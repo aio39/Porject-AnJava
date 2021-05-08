@@ -71,15 +71,15 @@ UserSchema.statics.createAccount = async function (
     ]).then(results => {
       if (!emailRegexp.test(email)) {
         signSuccess = false;
-        errorMsg += '이메일 형식이 옳바르지 않습니다.';
+        errorMsg += '이메일 형식이 옳바르지 않습니다. \n';
       }
       results.forEach(result => {
         if (result[0] === false) {
           signSuccess = false;
           if (result[1] === 'password') {
-            errorMsg += `비밀번호가 너무 짧습니다.`;
+            errorMsg += `비밀번호가 너무 짧습니다. \n`;
           } else {
-            errorMsg += `${result[1]}은 이미 존재합니다.`;
+            errorMsg += `${result[1]}은 이미 존재합니다. \n`;
           }
         }
       });

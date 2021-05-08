@@ -16,7 +16,6 @@ const RoomSchema = new mongoose.Schema({
     type: Date,
     validate: {
       validator: function (v) {
-        console.log(this);
         return new Date(v) > Date.now();
       },
     },
@@ -30,6 +29,35 @@ const RoomSchema = new mongoose.Schema({
       },
     },
   ],
+  repeatOption: {
+    measure: {
+      type: Number,
+      validate: {
+        validator: function (v) {
+          return [0, 1].includes(v); // 0 - 몇 주 단위로 1 - 매달  첫째주  무슨 요일
+        },
+      },
+    },
+    cycle: {
+      type: Number,
+      validate: {
+        validator: function (v) {
+          if (!(Math.round(v) === v)) return false;
+          // if (this.repeatOption.measure === 0) return v >= 1 && v <= 4;
+          // if (this.repeatOption.measure === 1) return v >= 0 && v <= 6;
+          return true;
+        },
+      },
+    },
+    way: {
+      type: Number,
+      validate: {
+        validator: function (v) {
+          return [0, 1, 2].includes(v); //  0 - 완전초기화 1- 랜덤 배치 2- 앞으로 전진
+        },
+      },
+    },
+  },
 });
 
 RoomSchema.methods.checkReserve = sitNum => {

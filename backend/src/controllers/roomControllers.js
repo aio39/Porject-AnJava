@@ -326,22 +326,23 @@ export const deleteReserveRoom = async (req, res) => {
 // * 방 리셋 관련 라우터
 export const patchResetDateRoom = async (req, res) => {
   const {
-    body: { resetDate: resetDateString },
+    body: { resetDate: resetDateString, repeatOption },
     params: { id: roomNum },
   } = req;
+  console.log(repeatOption);
   try {
     if (resetDateString) {
       const resetDate = new Date(resetDateString);
       await roomModel
         .findOneAndUpdate(
           { roomNum },
-          { $set: { resetDate } },
+          { $set: { resetDate, repeatOption } },
           { runValidators: true, context: 'query' },
         )
         .exec();
       apiResponse.successResponse(
         res,
-        `${roomNum} 방에 ${resetDate.toString()} 리셋 시간 등록 성공`,
+        `${roomNum}번 방에 ${resetDate.toString()} 리셋 시간 등록 성공`,
       );
     } else {
       await roomModel
