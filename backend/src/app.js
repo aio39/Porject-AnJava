@@ -9,6 +9,11 @@ import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerDocument from './swagger.json';
+import userModel from './models/User';
+import roomModel from './models/Room';
+import AdminBro from 'admin-bro';
+import AdminBroMongoose from '@admin-bro/mongoose';
+import AdminBroExpress from '@admin-bro/express';
 
 process.env.NODE_ENV = process.env.NODE_ENV
   ? process.env.NODE_ENV
@@ -17,6 +22,19 @@ process.env.NODE_ENV = process.env.NODE_ENV
 const specs = await swaggerJsdoc(swaggerDocument);
 
 const app = express();
+
+AdminBro.registerAdapter(AdminBroMongoose);
+
+const adminBro = new AdminBro({
+  // databases: [],
+  rootPath: '/admin',
+  resources: [userModel, roomModel],
+});
+
+const router = AdminBroExpress.buildRouter(adminBro);
+
+app.use(adminBro.options.rootPath, router);
+
 if (process.env.NODE_ENV === 'develope') {
   app.use(morgan('dev'));
 }
