@@ -4,11 +4,12 @@ import { nextResetScheduleData } from '../app.js';
 import { resetRoomReserve } from '../controllers/roomControllers';
 
 // todo resetRoomReserve 성공 실패 핸들링
+// * todo mongo에서 reset date를 가진 방만 받을 수 있지 않나 ?
+// todo mongo sort 사용 가능 ?
 
 export const getNextResetScheduleData = async () => {
   try {
     const allRoomArr = await roomModel.find({}, 'roomNum resetDate').exec();
-    // * todo mongo에서 reset date를 가진 방만 받을 수 있지 않나 ?
     const restructuredRoomArr = [];
     for (const room of allRoomArr) {
       if (room.resetDate) {
@@ -28,7 +29,6 @@ export const getNextResetScheduleData = async () => {
         date: restructuredRoomArr[0][1],
       };
 
-    // todo mongo sort 사용 가능 ?
     restructuredRoomArr.sort((a, b) => {
       return a[1] - b[1];
     });
@@ -71,7 +71,7 @@ export const registerResetRoomScheduleJob = () => {
   if (date < Date.now()) {
     console.log(`reset 시간이 현재보다 빠릅니다.
     reset date: ${date}
-    noe date: ${Date.now()}
+    now date: ${Date.now()}
     reset 시간을 다시 등록합니다.`);
     resetAndRegisterNewReset();
   } else {
@@ -82,22 +82,22 @@ export const registerResetRoomScheduleJob = () => {
 };
 
 export const resetAndRegisterNewReset = async () => {
-  console.log(nextResetScheduleData < Date.now());
   if (
-    nextResetScheduleData < Date.now() &&
+    nextResetScheduleData.date < Date.now() &&
     nextResetScheduleData.nextResetRoom.length > 0
-  )
+  ) {
+    console.info('리셋 시간이 지난 방들을 리셋합니다.');
     for (const room of nextResetScheduleData.nextResetRoom) {
       await resetRoomReserve(room);
     }
-
+  }
   const isHaveNextReset = await setResetData();
-  console.log(`다음에 등록할 리셋이 있습니까? ${isHaveNextReset}`);
+  console.info(`다음에 등록할 리셋이 있습니까? ${isHaveNextReset}`);
   if (isHaveNextReset) {
-    console.log('다음 리셋을 등록합니다.');
+    console.info('다음 리셋을 등록합니다.');
     registerResetRoomScheduleJob();
   } else {
-    console.log('등록된 초기화가 없습니다.');
+    console.info('등록할 리셋이 없습니다.');
   }
 };
 
@@ -105,10 +105,9 @@ const setResetData = async () => {
   const newData = await getNextResetScheduleData();
   if (!newData) return false;
   const { date, nextResetRoom } = newData;
-  // * export로 공유되고 있는 reset data 객체의 정보 갱신.
   nextResetScheduleData.date = date;
   nextResetScheduleData.nextResetRoom = nextResetRoom;
-  console.log(`setResetData Func: ${nextResetScheduleData.date}`);
+  console.info(`setResetData: 다음 리셋 날짜 ${nextResetScheduleData.date}`);
   return true;
 };
 

@@ -13,7 +13,7 @@ export const resetRoomReserve = async roomNum => {
       { roomNum },
       { $set: { reservedData: [], resetDate: undefined } },
     );
-    console.log(`방 ${roomNum} 리셋됨`);
+    console.info(`resetRoomReserve - 방 ${roomNum} 리셋됨`);
     return true;
   } catch (error) {
     return false;
@@ -37,6 +37,9 @@ export const resetUsersRoomReserve = async roomNum => {
             .exec();
         }),
       );
+    console.info(
+      `resetRoomReserve - 방 ${roomNum}을 예약한 유저들의 예약 정보 초기화`,
+    );
     return true;
   } catch (error) {
     console.error(error);
@@ -91,7 +94,7 @@ export const postCreateRoom = async (req, res) => {
       ...body,
     });
     await room.save();
-
+    resetAndRegisterNewReset();
     return apiResponse.successResponse(res, '새로운 방이 만들어졌습니다. ');
   } catch (error) {
     console.error(error);
@@ -148,6 +151,7 @@ export const deleteRoom = async (req, res) => {
   try {
     await resetUsersRoomReserve(roomNum);
     await roomModel.findOneAndDelete({ roomNum }).exec();
+    resetAndRegisterNewReset();
     return apiResponse.successResponse(res, '방과 유저들의 예약 초기화 성공');
   } catch (error) {
     return apiResponse.notFoundResponse(res, error.message);
