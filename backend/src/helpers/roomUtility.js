@@ -23,6 +23,12 @@ const roomUtility = {
         return false;
       });
   },
+  checkIsRoomStartAccept: async roomNum => {
+    return await roomModel.findOne({ roomNum }, 'acceptDate').then(docs => {
+      if (new Date(docs.acceptDate) < Date.now()) return true;
+      return false;
+    });
+  },
 };
 
 export default roomUtility;

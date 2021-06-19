@@ -29,7 +29,7 @@ export const resetUsersRoomReserve = async roomNum => {
     if (reservedData.length > 0)
       await Promise.all(
         reservedData.forEach(async a => {
-          const result = await userModel
+          await userModel
             .updateOne(
               { _id: a.user._id },
               { $pull: { reservedRooms: { roomNum } } },
@@ -37,7 +37,6 @@ export const resetUsersRoomReserve = async roomNum => {
             .exec();
         }),
       );
-
     return true;
   } catch (error) {
     console.error(error);
@@ -165,6 +164,15 @@ export const postReserveRoom = async (req, res) => {
   let isReserve;
   let userObjectId;
   let isUserHaveReserve;
+
+  try {
+    const isAccepting = await roomUtility.checkIsRoomStartAccept(roomNum);
+    if (!isAccepting)
+      return apiResponse.unauthorizedResponse(res, '접수 시작 전 입니다.');
+  } catch (error) {
+    console.error(error);
+    return apiResponse.notFoundResponse(res, error.message);
+  }
 
   try {
     isReserve = await roomUtility.checkReserveOverlap(roomNum, sitNum);

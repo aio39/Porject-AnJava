@@ -47,6 +47,7 @@ roomRouter
   .patch(jwtAuth.adminCheck, patchResetDateRoom)
   .get(getTestResetDateRoom);
 
+// * 방 접수 시작 시간 관련 라우터
 roomRouter
   .route(routes.acceptDateRoom)
   .all(checkIsRoom)
