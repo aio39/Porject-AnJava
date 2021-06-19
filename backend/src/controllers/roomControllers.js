@@ -4,21 +4,37 @@ import apiResponse from '../helpers/apiResponse';
 import { resetAndRegisterNewReset } from '../helpers/utility';
 import roomUtility from '../helpers/roomUtility';
 import userUtility from '../helpers/userUtility';
-
+import dayjs from 'dayjs';
 // * function
-export const resetRoomReserve = async roomNum => {
+export const resetRoomReserve = async (roomNum, isPatch = false) => {
   try {
     await resetUsersRoomReserve(roomNum);
-    // await roomModel.updateOne(
-    //   { roomNum },
-    //   { $set: { reservedData: [], resetDate: undefined } },
-    // );
     const foundRoom = await roomModel.findOne({ roomNum }).exec();
-    console.dir(foundRoom);
     foundRoom.reservedData = [];
-    foundRoom.resetDate = undefined;
-    foundRoom.acceptDate = foundRoom.acceptDateAfterReset;
-    foundRoom.acceptDateAfterReset = undefined;
+
+    if (!isPatch) {
+      if ([0, 1].includes(foundRoom.measure)) {
+        if (foundRoom.openDeffer) {
+          foundRoom.acceptDate = dayjs(foundRoom.resetDate).add(
+            foundRoom.openDeffer,
+            'minute',
+          );
+        }
+        if (foundRoom.measure === 0) {
+          foundRoom.resetDate = dayjs(foundRoom.resetDate).add(
+            foundRoom.weekendInterval,
+            'week',
+          );
+        }
+
+        foundRoom.acceptDateAfterReset = undefined;
+      } else {
+        foundRoom.resetDate = undefined;
+        foundRoom.acceptDate = foundRoom.acceptDateAfterReset;
+        foundRoom.acceptDateAfterReset = undefined;
+      }
+    }
+
     await foundRoom.save();
     console.info(`resetRoomReserve - 방 ${roomNum} 리셋됨`);
     return true;
@@ -192,7 +208,7 @@ export const patchRoom = async (req, res) => {
   const { isAdmin, userId, ...updateData } = req.body;
   try {
     if (column || row) {
-      await resetRoomReserve(oldRoomNum);
+      await resetRoomReserve(oldRoomNum, (isPatch = true));
     } else {
       // colum 또는 row가 수정되었다면 예약이 초기화 되어 아래 함수는 실행될 필요가 없다.
       if (newRoomNum)

@@ -35,32 +35,34 @@ const RoomSchema = new mongoose.Schema({
       },
     },
   ],
-  repeatOption: {
-    measure: {
-      type: Number,
-      validate: {
-        validator: function (v) {
-          return [0, 1].includes(v); // 0 - 몇 주 단위로 1 - 매달  첫째주  무슨 요일
-        },
+  measure: {
+    type: Number,
+    validate: {
+      validator: function (v) {
+        return [0, 1].includes(v); // 0 - 몇 주 단위로 1 - 매달  첫째주  무슨 요일
       },
     },
-    cycle: {
-      type: Number,
-      validate: {
-        validator: function (v) {
-          if (!(Math.round(v) === v)) return false;
-          // if (this.repeatOption.measure === 0) return v >= 1 && v <= 4;
-          // if (this.repeatOption.measure === 1) return v >= 0 && v <= 6;
-          return true;
-        },
-      },
-    },
-    way: {
-      type: Number,
-      validate: {
-        validator: function (v) {
-          return [0, 1, 2].includes(v); //  0 - 완전초기화 1- 랜덤 배치 2- 앞으로 전진
-        },
+  },
+  weekendInterval: {
+    // for  measure 0
+    type: Number, // 1~ 25
+  },
+  weekNth: {
+    // for  measure 1
+    type: Number, // 1~4
+  },
+  day: {
+    // for  measure 1
+    type: Number, // 0 ~ 6
+  },
+  openDeffer: {
+    type: Number, // 60 * 24 * 7
+  },
+  way: {
+    type: Number,
+    validate: {
+      validator: function (v) {
+        return [0, 1, 2].includes(v); //  0 - 완전초기화 1- 랜덤 배치 2- 앞으로 전진
       },
     },
   },
@@ -84,8 +86,23 @@ RoomSchema.post('save', (error, doc, next) => {
 });
 
 RoomSchema.pre('validate', function (next) {
-  console.dir(this.acceptDate);
-  console.dir(this.resetDate);
+  if (+this.measure === 0) {
+    if (!(this.weekendInterval >= 1 && this.weekendInterval <= 25))
+      return next(new Error('반복 주 간격은 1에서 25 사이여야합니다.'));
+  }
+  if (+this.measure === 1) {
+    if (!(this.weekNth >= 1 && this.weekNth <= 4))
+      return next(new Error('매달 몇번째 주의 값은 1에서 4 사이여야합니다.'));
+    if (!(this.day >= 1 && this.day <= 25))
+      return next(new Error('반복 요일은 일요일 0에서 금요일 6까지 입니다.'));
+  }
+
+  if (this.measure) {
+    if (this.openDeffer && this.openDeffer <= 0)
+      return next(new Error('openDeffer 오픈 지연 시간은 0보다 커야합니다.'));
+  }
+
+  //  리셋 날짜, 오픈 날짜 유효성 검사
   if (this.acceptDate && this.resetDate) {
     if (new Date(this.resetDate) < new Date(this.acceptDate))
       return next(
