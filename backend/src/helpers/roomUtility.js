@@ -25,7 +25,7 @@ const roomUtility = {
   },
   checkIsRoomStartAccept: async roomNum => {
     return await roomModel.findOne({ roomNum }, 'acceptDate').then(docs => {
-      if (new Date(docs.acceptDate) < Date.now()) return true;
+      if (new Date(docs.acceptDate || 0) < Date.now()) return true;
       return false;
     });
   },
