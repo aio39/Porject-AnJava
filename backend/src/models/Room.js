@@ -58,6 +58,9 @@ const RoomSchema = new mongoose.Schema({
   openDeffer: {
     type: Number, // 60 * 24 * 7
   },
+  isShuffle: {
+    type: Boolean,
+  },
   way: {
     type: Number,
     validate: {

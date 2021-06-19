@@ -34,11 +34,11 @@ export let forbiddenObjectId;
 
 if (process.env.NODE_ENV === 'develope') {
   mongoose.connection.on('connected', async () => {
-    forbiddenObjectId = await userUtility.checkUserExists('forbidden');
-    testPatchResetDate;
+    // forbiddenObjectId = await userUtility.checkUserExists('forbidden');
+    testPatchResetDate();
   });
 } else
   mongoose.connection.once('connected', async () => {
-    forbiddenObjectId = await userUtility.checkUserExists('forbidden');
+    // forbiddenObjectId = await userUtility.checkUserExists('forbidden');
     resetAndRegisterNewReset();
   });

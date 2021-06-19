@@ -7,14 +7,21 @@ import userUtility from '../helpers/userUtility';
 import dayjs from 'dayjs';
 import { forbiddenObjectId } from '../db';
 // * function
-export const resetRoomReserve = async (roomNum, isPatch = false) => {
+export const resetRoomReserve = async (
+  roomNum,
+  isPatch = false,
+  isFromShuffle = false,
+) => {
   try {
+    let foundRoom = await roomModel.findOne({ roomNum }).exec();
+    if (!isFromShuffle && foundRoom.isShuffle === true)
+      return await shuffleRoom(roomNum, true);
     await resetUsersRoomReserve(roomNum);
-    const foundRoom = await roomModel.findOne({ roomNum }).exec();
-    foundRoom.reservedData = foundRoom.reservedData.filter(r => {
-      if (r._user == forbiddenObjectId) return true;
-      return false;
-    });
+    foundRoom = await roomModel.findOne({ roomNum }).exec();
+    // foundRoom.reservedData = foundRoom.reservedData.filter(r => {
+    //   if (r._user == forbiddenObjectId) return true;
+    //   return false;
+    // });
 
     if (!isPatch) {
       if ([0, 1].includes(foundRoom.measure)) {
@@ -49,6 +56,12 @@ export const resetRoomReserve = async (roomNum, isPatch = false) => {
         }
         foundRoom.acceptDateAfterReset = undefined;
       } else {
+        foundRoom.resetDate = undefined;
+        foundRoom.acceptDate = foundRoom.acceptDateAfterReset;
+        foundRoom.acceptDateAfterReset = undefined;
+      }
+    } else {
+      if (foundRoom.resetDate < Date.now()) {
         foundRoom.resetDate = undefined;
         foundRoom.acceptDate = foundRoom.acceptDateAfterReset;
         foundRoom.acceptDateAfterReset = undefined;
@@ -118,6 +131,55 @@ export const changeUsersRoomReserveRoomNumber = async (
     console.info(
       `resetRoomReserve - 방 ${roomNum}을 예약한 유저들의 예약 정보 초기화`,
     );
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+};
+
+export const shuffleRoom = async (roomNum, isReset = false) => {
+  const userObjectIdArr = [];
+  let foundRoom;
+  try {
+    foundRoom = await roomModel.findOne({ roomNum }).exec();
+    foundRoom.reservedData.forEach(r => userObjectIdArr.push(r.user));
+    if (isReset) {
+      await resetRoomReserve(roomNum, false, true); // Reset 갱신하며 좌석도 초기화
+    } else {
+      await resetRoomReserve(roomNum, true, true); // Reset데이터는 수정하지  않고 좌석 정보만 초기화
+    }
+    foundRoom = await roomModel.findOne({ roomNum }).exec();
+  } catch (error) {
+    return false;
+  }
+
+  const randomNumberArr = roomUtility.generateShuffledNumber(
+    foundRoom.maxSit,
+    userObjectIdArr.length,
+  );
+
+  try {
+    Promise.all(
+      userObjectIdArr.map((userObjectId, index) => {
+        foundRoom.reservedData[index] = {
+          user: userObjectId,
+          sitNum: randomNumberArr[index],
+        };
+        return userModel
+          .findByIdAndUpdate(
+            userObjectId,
+            {
+              $addToSet: {
+                reservedRooms: [{ sitNum: randomNumberArr[index], roomNum }],
+              },
+            },
+            { runValidators: true, context: 'query' },
+          )
+          .exec();
+      }),
+    );
+    foundRoom.save();
     return true;
   } catch (error) {
     console.error(error);
@@ -240,6 +302,7 @@ export const patchRoom = async (req, res) => {
       foundRoom[key] = value;
     }
     await foundRoom.save();
+    resetAndRegisterNewReset();
     return apiResponse.successResponseWithData(res, '방 정보 업데이트 성공', {
       foundRoom,
     });
@@ -495,52 +558,12 @@ export const patchRoomShuffle = async (req, res) => {
   const {
     params: { id: roomNum },
   } = req;
-  const userObjectIdArr = [];
-  let foundRoom;
-  try {
-    foundRoom = await roomModel.findOne({ roomNum }).exec();
-    foundRoom.reservedData.forEach(r => userObjectIdArr.push(r.user));
-    await resetRoomReserve(roomNum, true); // Reset데이터는 수정하지  않고 좌석 정보만 초기화
-    foundRoom = await roomModel.findOne({ roomNum }).exec();
-  } catch (error) {
-    return apiResponse.notFoundResponse(
-      res,
-      `${roomNum} 방을 찾을 수 없습니다..`,
-    );
-  }
 
-  const randomNumberArr = roomUtility.generateShuffledNumber(
-    foundRoom.maxSit,
-    userObjectIdArr.length,
-  );
-
-  try {
-    Promise.all(
-      userObjectIdArr.map((userObjectId, index) => {
-        foundRoom.reservedData[index] = {
-          user: userObjectId,
-          sitNum: randomNumberArr[index],
-        };
-        return userModel
-          .findByIdAndUpdate(
-            userObjectId,
-            {
-              $addToSet: {
-                reservedRooms: [{ sitNum: randomNumberArr[index], roomNum }],
-              },
-            },
-            { runValidators: true, context: 'query' },
-          )
-          .exec();
-      }),
-    );
-    foundRoom.save();
-
+  const result = await shuffleRoom(roomNum);
+  if (result) {
     return apiResponse.successResponse(res, '좌석을 셔플하였습니다..');
-  } catch (error) {
-    console.error(error);
-    return apiResponse.unauthorizedResponse(res, '셔플에 실패했습니다..');
   }
+  return apiResponse.unauthorizedResponse(res, '셔플에 실패했습니다..');
 };
 
 // * 방 리셋 관련 라우터
