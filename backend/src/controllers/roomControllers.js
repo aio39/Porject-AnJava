@@ -31,20 +31,54 @@ export const resetRoomReserve = async roomNum => {
 export const resetUsersRoomReserve = async roomNum => {
   try {
     const { reservedData } = await roomModel
-      .findOne({ roomNum }, 'reserveData')
+      .findOne({ roomNum }, 'reservedData')
       .populate('reservedData.user', 'userId')
       .exec();
-    if (reservedData.length > 0)
+
+    if (reservedData.length > 0) {
       await Promise.all(
-        reservedData.forEach(async a => {
-          await userModel
+        reservedData.map(a => {
+          return userModel
             .updateOne(
               { _id: a.user._id },
-              { $pull: { reservedRooms: { roomNum } } },
+              { $pull: { reservedRooms: { roomNum: parseInt(roomNum) } } },
             )
             .exec();
         }),
       );
+    }
+    console.info(
+      `resetRoomReserve - 방 ${roomNum}을 예약한 유저들의 예약 정보 초기화`,
+    );
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+};
+
+export const changeUsersRoomReserveRoomNumber = async (
+  oldRoomNum,
+  newRoomNum,
+) => {
+  try {
+    const { reservedData } = await roomModel
+      .findOne({ roomNum: oldRoomNum }, 'reservedData')
+      .populate('reservedData.user', 'userId')
+      .exec();
+
+    if (reservedData.length > 0) {
+      await Promise.all(
+        reservedData.map(a => {
+          return userModel
+            .updateOne(
+              { _id: a.user._id, 'reservedRooms.roomNum': oldRoomNum },
+              { $set: { reservedRooms: { roomNum: newRoomNum } } },
+            )
+            .exec();
+        }),
+      );
+    }
     console.info(
       `resetRoomReserve - 방 ${roomNum}을 예약한 유저들의 예약 정보 초기화`,
     );
@@ -150,7 +184,34 @@ export const getOneRoom = async (req, res) => {
   }
 };
 
-export const patchRoom = async (req, res) => {};
+export const patchRoom = async (req, res) => {
+  const {
+    params: { id: oldRoomNum },
+    body: { column, row, roomNum: newRoomNum },
+  } = req;
+  const { isAdmin, userId, ...updateData } = req.body;
+  try {
+    if (column || row) {
+      await resetRoomReserve(oldRoomNum);
+    } else {
+      // colum 또는 row가 수정되었다면 예약이 초기화 되어 아래 함수는 실행될 필요가 없다.
+      if (newRoomNum)
+        await changeUsersRoomReserveRoomNumber(oldRoomNum, newRoomNum);
+    }
+    const foundRoom = await roomModel.findOne({ roomNum: oldRoomNum }).exec();
+    for (let [key, value] of Object.entries(updateData)) {
+      console.log(key, value);
+      foundRoom[key] = value;
+    }
+    await foundRoom.save();
+    return apiResponse.successResponseWithData(res, '방 정보 업데이트 성공', {
+      foundRoom,
+    });
+  } catch (error) {
+    console.error(error);
+    return apiResponse.parmaNotSatisfyResponse(res, error.message);
+  }
+};
 
 export const deleteRoom = async (req, res) => {
   const {
