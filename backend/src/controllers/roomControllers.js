@@ -19,6 +19,8 @@ export const resetRoomReserve = async (roomNum, isPatch = false) => {
             foundRoom.openDeffer,
             'minute',
           );
+        } else {
+          foundRoom.acceptDate = undefined;
         }
         if (foundRoom.measure === 0) {
           foundRoom.resetDate = dayjs(foundRoom.resetDate).add(
@@ -26,7 +28,21 @@ export const resetRoomReserve = async (roomNum, isPatch = false) => {
             'week',
           );
         }
+        if (foundRoom.measure === 1) {
+          const correctionValue =
+            dayjs(foundRoom.resetDate).add(1, 'month').date(1).get('day') >
+            foundRoom.day;
 
+          const addWeek = correctionValue
+            ? foundRoom.weekNth
+            : foundRoom.weekNth - 1;
+          foundRoom.resetDate = dayjs(foundRoom.resetDate)
+            .add(1, 'month')
+            .date(1)
+            .day(foundRoom.day)
+            .add(addWeek, 'week')
+            .toISOString();
+        }
         foundRoom.acceptDateAfterReset = undefined;
       } else {
         foundRoom.resetDate = undefined;
