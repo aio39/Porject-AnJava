@@ -23,6 +23,9 @@ const RoomSchema = new mongoose.Schema({
   acceptDate: {
     type: Date,
   },
+  acceptDateAfterReset: {
+    type: Date,
+  },
   reservedData: [
     {
       sitNum: Number,
@@ -81,6 +84,29 @@ RoomSchema.post('save', (error, doc, next) => {
 });
 
 RoomSchema.pre('validate', function (next) {
+  if (this.acceptDate) {
+    if (new Date(this.resetDate) < new Date(this.acceptDate))
+      return next(
+        new Error('acceptDate는 resetDate보다 빠른 날짜 이어야 합니다.'),
+      );
+  }
+
+  // * acceptDateAfterReset에 대한 유효성 체크
+  if (this.acceptDateAfterReset) {
+    if (!this.resetDate)
+      return next(
+        new Error(
+          'acceptDateAfterReset을 등록하기 위해서는 resetDate가 있어야 합니다.',
+        ),
+      );
+    if (new Date(this.resetDate) > new Date(this.acceptDateAfterReset))
+      return next(
+        new Error(
+          'acceptDateAfterReset가 resetDate보다 늦은 날짜 이어야 합니다.',
+        ),
+      );
+  }
+
   // * 블랭크가 실제 라인 수 보다 큰지 체크 합니다.
   if (
     this.rowBlankLine.length != 0 &&
