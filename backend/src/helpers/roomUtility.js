@@ -29,6 +29,14 @@ const roomUtility = {
       return false;
     });
   },
+  generateShuffledNumber: (maxSit, userLength) => {
+    const resultArr = [];
+    const basicArr = Array.from(Array(maxSit)).map((e, i) => i + 1);
+    for (let index = 0; index < userLength; index++) {
+      resultArr.push(basicArr.splice(Math.random() * basicArr.length, 1)[0]);
+    }
+    return resultArr;
+  },
 };
 
 export default roomUtility;

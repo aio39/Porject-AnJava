@@ -228,7 +228,7 @@ export const patchRoom = async (req, res) => {
   const { isAdmin, userId, ...updateData } = req.body;
   try {
     if (column || row) {
-      await resetRoomReserve(oldRoomNum, (isPatch = true));
+      await resetRoomReserve(oldRoomNum, true);
     } else {
       // colum 또는 row가 수정되었다면 예약이 초기화 되어 아래 함수는 실행될 필요가 없다.
       if (newRoomNum)
@@ -488,6 +488,58 @@ export const patchRoomForbiddenSit = async (req, res) => {
     return apiResponse.successCreateResponse(res, '예약이 성공 했습니다.');
   } catch (error) {
     return apiResponse.notFoundResponse(res, error);
+  }
+};
+
+export const patchRoomShuffle = async (req, res) => {
+  const {
+    params: { id: roomNum },
+  } = req;
+  const userObjectIdArr = [];
+  let foundRoom;
+  try {
+    foundRoom = await roomModel.findOne({ roomNum }).exec();
+    foundRoom.reservedData.forEach(r => userObjectIdArr.push(r.user));
+    await resetRoomReserve(roomNum, true); // Reset데이터는 수정하지  않고 좌석 정보만 초기화
+    foundRoom = await roomModel.findOne({ roomNum }).exec();
+  } catch (error) {
+    return apiResponse.notFoundResponse(
+      res,
+      `${roomNum} 방을 찾을 수 없습니다..`,
+    );
+  }
+
+  const randomNumberArr = roomUtility.generateShuffledNumber(
+    foundRoom.maxSit,
+    userObjectIdArr.length,
+  );
+
+  try {
+    Promise.all(
+      userObjectIdArr.map((userObjectId, index) => {
+        foundRoom.reservedData[index] = {
+          user: userObjectId,
+          sitNum: randomNumberArr[index],
+        };
+        return userModel
+          .findByIdAndUpdate(
+            userObjectId,
+            {
+              $addToSet: {
+                reservedRooms: [{ sitNum: randomNumberArr[index], roomNum }],
+              },
+            },
+            { runValidators: true, context: 'query' },
+          )
+          .exec();
+      }),
+    );
+    foundRoom.save();
+
+    return apiResponse.successResponse(res, '좌석을 셔플하였습니다..');
+  } catch (error) {
+    console.error(error);
+    return apiResponse.unauthorizedResponse(res, '셔플에 실패했습니다..');
   }
 };
 

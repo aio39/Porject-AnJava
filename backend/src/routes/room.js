@@ -12,6 +12,7 @@ import {
   patchRoom,
   patchAcceptDateRoom,
   patchRoomForbiddenSit,
+  patchRoomShuffle,
 } from '../controllers/roomControllers';
 import jwtAuth from '../helpers/jwtAuthMiddle';
 import { checkIsRoom } from '../helpers/middleware';
@@ -45,6 +46,11 @@ roomRouter
   .route(routes.forbiddenRoomSit)
   .all(checkIsRoom, jwtAuth.adminCheck)
   .patch(patchRoomForbiddenSit);
+
+roomRouter
+  .route(routes.shuffleRoom)
+  .all(checkIsRoom, jwtAuth.adminCheck)
+  .patch(patchRoomShuffle);
 
 // * 방 리셋 관련 라우터
 roomRouter

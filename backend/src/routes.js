@@ -14,6 +14,7 @@ const CANCEL_ROOM = '/:id/cancel';
 const CANCEL_ALL_ROOMS = '/all/cancel';
 const RESETDATE_ROOM = '/:id/reset';
 const ACCEPTDATE_ROOM = '/:id/accept';
+const SHUFFLE_ROOM = '/:id/shuffle';
 
 const routes = {
   users: USERS,
@@ -27,6 +28,7 @@ const routes = {
   resetDateRoom: RESETDATE_ROOM,
   acceptDateRoom: ACCEPTDATE_ROOM,
   forbiddenRoomSit: FORBIDDEN_ROOM_SIT,
+  shuffleRoom: SHUFFLE_ROOM,
 };
 
 export default routes;
