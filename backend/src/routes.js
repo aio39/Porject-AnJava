@@ -12,6 +12,7 @@ const RESERVE_ROOM = '/:id/reserve';
 const CANCEL_ROOM = '/:id/cancel';
 const CANCEL_ALL_ROOMS = '/all/cancel';
 const RESETDATE_ROOM = '/:id/reset';
+const ACCEPTDATE_ROOM = '/:id/accept';
 
 const routes = {
   users: USERS,
@@ -23,6 +24,7 @@ const routes = {
   cancelRoom: CANCEL_ROOM,
   cancelAllRooms: CANCEL_ALL_ROOMS,
   resetDateRoom: RESETDATE_ROOM,
+  acceptDateRoom: ACCEPTDATE_ROOM,
 };
 
 export default routes;

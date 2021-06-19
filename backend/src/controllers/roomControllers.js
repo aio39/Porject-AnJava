@@ -56,7 +56,7 @@ export const getAllRooms = async (req, res) => {
     const { _id: user_id } = await userModel.findOne({ userId }, '_id').exec();
 
     const roomsData = rooms.map(room => {
-      const { roomNum, maxSit, resetDate, reservedData } = room;
+      const { roomNum, maxSit, resetDate, reservedData, acceptDate } = room;
       const remainSit = maxSit - reservedData.length;
       let isUserIncluded;
       if (
@@ -68,7 +68,14 @@ export const getAllRooms = async (req, res) => {
       } else {
         isUserIncluded = false;
       }
-      return { roomNum, maxSit, resetDate, remainSit, isUserIncluded };
+      return {
+        roomNum,
+        maxSit,
+        resetDate,
+        remainSit,
+        isUserIncluded,
+        acceptDate,
+      };
     });
     return apiResponse.successResponseWithData(res, `모든 방 리스트입니다.`, {
       roomsData,
@@ -118,6 +125,7 @@ export const getOneRoom = async (req, res) => {
       rowBlankLine: room.rowBlankLine,
       columnBlankLine: room.columnBlankLine,
       resetDate: room.resetDate || '',
+      acceptDate: room.resetDate || '',
       maxSit: room.maxSit,
       remainSit,
       reservedData,
@@ -378,5 +386,44 @@ export const getTestResetDateRoom = async (req, res) => {
       });
   } catch (error) {
     return apiResponse.notFoundResponse(res, error.message);
+  }
+};
+
+export const patchAcceptDateRoom = async (req, res) => {
+  const {
+    body: { acceptDate: acceptDateString },
+    params: { id: roomNum },
+  } = req;
+  try {
+    if (acceptDateString) {
+      const acceptDate = new Date(acceptDateString);
+      await roomModel
+        .findOneAndUpdate(
+          { roomNum },
+          { $set: { acceptDate } },
+          { runValidators: true, context: 'query' },
+        )
+        .exec();
+      apiResponse.successResponse(
+        res,
+        `${roomNum}번 방에 ${acceptDate.toString()} 접수 시작 시간 등록 성공`,
+      );
+    } else {
+      await roomModel
+        .findOneAndUpdate(
+          { roomNum },
+          { $unset: { acceptDate: '' } },
+          { runValidators: true, context: 'query' },
+        )
+        .exec();
+      apiResponse.successResponse(
+        res,
+        `${roomNum} 방의 접수 시작 시간 삭제됨.`,
+      );
+    }
+
+    return;
+  } catch (error) {
+    return apiResponse.parmaNotSatisfyResponse(res, error);
   }
 };

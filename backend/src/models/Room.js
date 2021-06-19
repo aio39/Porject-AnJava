@@ -20,6 +20,9 @@ const RoomSchema = new mongoose.Schema({
       },
     },
   },
+  acceptDate: {
+    type: Date,
+  },
   reservedData: [
     {
       sitNum: Number,

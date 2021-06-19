@@ -10,6 +10,7 @@ import {
   getTestResetDateRoom,
   deleteRoom,
   patchRoom,
+  patchAcceptDateRoom,
 } from '../controllers/roomControllers';
 import jwtAuth from '../helpers/jwtAuthMiddle';
 import { checkIsRoom } from '../helpers/middleware';
@@ -45,5 +46,10 @@ roomRouter
   .all(checkIsRoom)
   .patch(jwtAuth.adminCheck, patchResetDateRoom)
   .get(getTestResetDateRoom);
+
+roomRouter
+  .route(routes.acceptDateRoom)
+  .all(checkIsRoom)
+  .patch(jwtAuth.adminCheck, patchAcceptDateRoom);
 
 export default roomRouter;
