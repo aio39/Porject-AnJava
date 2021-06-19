@@ -9,13 +9,21 @@ import userUtility from '../helpers/userUtility';
 export const resetRoomReserve = async roomNum => {
   try {
     await resetUsersRoomReserve(roomNum);
-    await roomModel.updateOne(
-      { roomNum },
-      { $set: { reservedData: [], resetDate: undefined } },
-    );
+    // await roomModel.updateOne(
+    //   { roomNum },
+    //   { $set: { reservedData: [], resetDate: undefined } },
+    // );
+    const foundRoom = await roomModel.findOne({ roomNum }).exec();
+    console.dir(foundRoom);
+    foundRoom.reservedData = [];
+    foundRoom.resetDate = undefined;
+    foundRoom.acceptDate = foundRoom.acceptDateAfterReset;
+    foundRoom.acceptDateAfterReset = undefined;
+    await foundRoom.save();
     console.info(`resetRoomReserve - 방 ${roomNum} 리셋됨`);
     return true;
   } catch (error) {
+    console.error(error);
     return false;
   }
 };

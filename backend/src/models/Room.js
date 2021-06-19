@@ -84,7 +84,9 @@ RoomSchema.post('save', (error, doc, next) => {
 });
 
 RoomSchema.pre('validate', function (next) {
-  if (this.acceptDate) {
+  console.dir(this.acceptDate);
+  console.dir(this.resetDate);
+  if (this.acceptDate && this.resetDate) {
     if (new Date(this.resetDate) < new Date(this.acceptDate))
       return next(
         new Error('acceptDate는 resetDate보다 빠른 날짜 이어야 합니다.'),
