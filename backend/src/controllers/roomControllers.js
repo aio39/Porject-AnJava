@@ -185,7 +185,7 @@ export const getOneRoom = async (req, res) => {
       rowBlankLine: room.rowBlankLine,
       columnBlankLine: room.columnBlankLine,
       resetDate: room.resetDate || '',
-      acceptDate: room.resetDate || '',
+      acceptDate: room.acceptDate || '',
       maxSit: room.maxSit,
       remainSit,
       reservedData,
