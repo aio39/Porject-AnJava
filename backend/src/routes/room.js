@@ -11,6 +11,7 @@ import {
   deleteRoom,
   patchRoom,
   patchAcceptDateRoom,
+  patchRoomForbiddenSit,
 } from '../controllers/roomControllers';
 import jwtAuth from '../helpers/jwtAuthMiddle';
 import { checkIsRoom } from '../helpers/middleware';
@@ -39,6 +40,11 @@ roomRouter
   .all(checkIsRoom)
   .post(postReserveRoom)
   .delete(deleteReserveRoom);
+
+roomRouter
+  .route(routes.forbiddenRoomSit)
+  .all(checkIsRoom, jwtAuth.adminCheck)
+  .patch(patchRoomForbiddenSit);
 
 // * 방 리셋 관련 라우터
 roomRouter

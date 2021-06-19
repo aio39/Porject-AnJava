@@ -9,6 +9,7 @@ const USER = '/:id';
 const ROOM = '/room';
 const ROOM_ONE = '/:id';
 const RESERVE_ROOM = '/:id/reserve';
+const FORBIDDEN_ROOM_SIT = '/:id/forbidden';
 const CANCEL_ROOM = '/:id/cancel';
 const CANCEL_ALL_ROOMS = '/all/cancel';
 const RESETDATE_ROOM = '/:id/reset';
@@ -25,6 +26,7 @@ const routes = {
   cancelAllRooms: CANCEL_ALL_ROOMS,
   resetDateRoom: RESETDATE_ROOM,
   acceptDateRoom: ACCEPTDATE_ROOM,
+  forbiddenRoomSit: FORBIDDEN_ROOM_SIT,
 };
 
 export default routes;

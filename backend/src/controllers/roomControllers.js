@@ -5,12 +5,16 @@ import { resetAndRegisterNewReset } from '../helpers/utility';
 import roomUtility from '../helpers/roomUtility';
 import userUtility from '../helpers/userUtility';
 import dayjs from 'dayjs';
+import { forbiddenObjectId } from '../db';
 // * function
 export const resetRoomReserve = async (roomNum, isPatch = false) => {
   try {
     await resetUsersRoomReserve(roomNum);
     const foundRoom = await roomModel.findOne({ roomNum }).exec();
-    foundRoom.reservedData = [];
+    foundRoom.reservedData = foundRoom.reservedData.filter(r => {
+      if (r._user == forbiddenObjectId) return true;
+      return false;
+    });
 
     if (!isPatch) {
       if ([0, 1].includes(foundRoom.measure)) {
@@ -440,6 +444,49 @@ export const deleteReserveRoom = async (req, res) => {
     }
   } catch (error) {
     console.error(error);
+    return apiResponse.notFoundResponse(res, error);
+  }
+};
+
+// * 금지 좌석 라우팅
+export const patchRoomForbiddenSit = async (req, res) => {
+  const {
+    body: { sitNum },
+    params: { id: roomNum },
+  } = req;
+
+  const { maxSit } = await roomModel.findOne({ roomNum }, 'maxSit').exec();
+  if (maxSit < sitNum)
+    return apiResponse.notFoundResponse(
+      res,
+      `${sitNum}번은 존재하지 않는 좌석입니다.`,
+    );
+  try {
+    // * 방의 예약 정보를 갱신합니다.
+    const updateRoomResult = await roomModel
+      .updateOne(
+        { roomNum },
+        { $addToSet: { reservedData: [{ sitNum, user: forbiddenObjectId }] } },
+        { runValidators: true, context: 'query' },
+      )
+      .exec();
+    if (updateRoomResult.nModified === 0)
+      return apiResponse.notFoundResponse(
+        res,
+        `${roomNum}가 존재하지 않아 예약에 실패 했습니다.`,
+      );
+
+    // * 유저의 예약 정보를 갱신합니다.
+    const updateUserResult = await userModel.findByIdAndUpdate(
+      forbiddenObjectId,
+      {
+        $addToSet: { reservedRooms: [{ sitNum, roomNum }] },
+      },
+      { runValidators: true, context: 'query' },
+    );
+
+    return apiResponse.successCreateResponse(res, '예약이 성공 했습니다.');
+  } catch (error) {
     return apiResponse.notFoundResponse(res, error);
   }
 };

@@ -45,7 +45,7 @@ const RoomSchema = new mongoose.Schema({
   },
   weekendInterval: {
     // for  measure 0
-    type: Number, // 1~ 25
+    type: Number, // 1~ 55
   },
   weekNth: {
     // for  measure 1
@@ -93,7 +93,7 @@ RoomSchema.pre('validate', function (next) {
   if (+this.measure === 1) {
     if (!(this.weekNth >= 1 && this.weekNth <= 4))
       return next(new Error('매달 몇번째 주의 값은 1에서 4 사이여야합니다.'));
-    if (!(this.day >= 1 && this.day <= 25))
+    if (!(this.day >= 1 && this.day <= 55))
       return next(new Error('반복 요일은 일요일 0에서 금요일 6까지 입니다.'));
   }
 

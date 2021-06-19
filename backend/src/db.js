@@ -4,6 +4,7 @@ import {
   testPatchResetDate,
   resetAndRegisterNewReset,
 } from './helpers/utility';
+import userUtility from './helpers/userUtility';
 
 dotenv.config();
 
@@ -29,6 +30,15 @@ connectToDB();
 
 mongoose.connection.on('disconnected', connectToDB);
 
+export let forbiddenObjectId;
+
 if (process.env.NODE_ENV === 'develope') {
-  mongoose.connection.on('connected', testPatchResetDate);
-} else mongoose.connection.once('connected', resetAndRegisterNewReset);
+  mongoose.connection.on('connected', async () => {
+    forbiddenObjectId = await userUtility.checkUserExists('forbidden');
+    testPatchResetDate;
+  });
+} else
+  mongoose.connection.once('connected', async () => {
+    forbiddenObjectId = await userUtility.checkUserExists('forbidden');
+    resetAndRegisterNewReset();
+  });
