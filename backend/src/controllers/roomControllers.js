@@ -335,14 +335,14 @@ export const patchRoom = async (req, res) => {
   } = req;
   const { isAdmin, userId, ...updateData } = req.body;
   try {
-    if (column || row) {
+    const foundRoom = await roomModel.findOne({ roomNum: oldRoomNum }).exec();
+    if (column !== foundRoom.column || row !== foundRoom.row) {
       await resetRoomReserve(oldRoomNum, true);
     } else {
       // colum 또는 row가 수정되었다면 예약이 초기화 되어 아래 함수는 실행될 필요가 없다.
-      if (newRoomNum)
+      if (newRoomNum !== oldRoomNum)
         await changeUsersRoomReserveRoomNumber(oldRoomNum, newRoomNum);
     }
-    const foundRoom = await roomModel.findOne({ roomNum: oldRoomNum }).exec();
     for (let [key, value] of Object.entries(updateData)) {
       console.log(key, value);
       foundRoom[key] = value;
