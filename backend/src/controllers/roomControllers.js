@@ -322,6 +322,19 @@ export const patchRoom = async (req, res) => {
       console.log(key, value);
       foundRoom[key] = value;
     }
+    if (updateData.measure === 0) {
+      foundRoom.day = undefined;
+      foundRoom.weekNth = undefined;
+    }
+    if (updateData.measure === 1) {
+      foundRoom.weekendInterval = undefined;
+    }
+    if (updateData.measure === -1) {
+      foundRoom.measure = undefined;
+      foundRoom.day = undefined;
+      foundRoom.weekNth = undefined;
+      foundRoom.weekendInterval = undefined;
+    }
     await foundRoom.save();
     resetAndRegisterNewReset();
     return apiResponse.successResponseWithData(res, '방 정보 업데이트 성공', {
