@@ -23,16 +23,23 @@ export const resetRoomReserve = async (
     //   return false;
     // });
 
+    // isPatch가 true일 경우에는 리셋 날짜가 되어서 실행되는 것이 아닌
+    // row, col 변경으로 예약 정보만 초기화 후 방의 리셋 정보는 보존된다.
     if (!isPatch) {
+      if (foundRoom.openDeffer) {
+        foundRoom.acceptDate = roomUtility.getDeferredAcceptDate(
+          foundRoom.resetDate,
+          foundRoom.openDeffer,
+        );
+      } else {
+        foundRoom.acceptDate = undefined;
+      }
       if ([0, 1].includes(foundRoom.measure)) {
-        if (foundRoom.openDeffer) {
-          foundRoom.acceptDate = dayjs(foundRoom.resetDate).add(
-            foundRoom.openDeffer,
-            'minute',
-          );
-        } else {
-          foundRoom.acceptDate = undefined;
-        }
+        // if (foundRoom.openDeffer) {
+        //   foundRoom.acceptDate = roomUtility.getDeferredAcceptDate(foundRoom.resetDate,foundRoom.openDeffer)
+        // } else {
+        //   foundRoom.acceptDate = undefined;
+        // }
         if (foundRoom.measure === 0) {
           foundRoom.resetDate = dayjs(foundRoom.resetDate).add(
             foundRoom.weekendInterval,
@@ -60,14 +67,24 @@ export const resetRoomReserve = async (
         );
       } else {
         foundRoom.resetDate = undefined;
-        foundRoom.acceptDate = foundRoom.acceptDateAfterReset;
-        foundRoom.acceptDateAfterReset = undefined;
+        // foundRoom.acceptDate = foundRoom.acceptDateAfterReset;
+        // foundRoom.acceptDateAfterReset = undefined;
       }
     } else {
+      //  isPatch가 true라면 방의 resetDate 설정은 변화가 없어야하지만
+      //  resetDate가 이미 지났다면 resetDate를 최신화한다.
       if (foundRoom.resetDate < Date.now()) {
         foundRoom.resetDate = undefined;
-        foundRoom.acceptDate = foundRoom.acceptDateAfterReset;
-        foundRoom.acceptDateAfterReset = undefined;
+        // foundRoom.acceptDate = foundRoom.acceptDateAfterReset;
+        // foundRoom.acceptDateAfterReset = undefined;
+        if (foundRoom.openDeffer) {
+          foundRoom.acceptDate = roomUtility.getDeferredAcceptDate(
+            foundRoom.resetDate,
+            foundRoom.openDeffer,
+          );
+        } else {
+          foundRoom.acceptDate = undefined;
+        }
       }
     }
 

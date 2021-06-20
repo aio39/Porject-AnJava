@@ -1,4 +1,5 @@
 import roomModel from '../models/Room';
+import dayjs from 'dayjs';
 
 const roomUtility = {
   checkReserveOverlap: async (roomNum, sitNum) => {
@@ -36,6 +37,9 @@ const roomUtility = {
       resultArr.push(basicArr.splice(Math.random() * basicArr.length, 1)[0]);
     }
     return resultArr;
+  },
+  getDeferredAcceptDate: (resetDate, defferMinute) => {
+    return dayjs(resetDate).add(defferMinute, 'minute');
   },
 };
 
