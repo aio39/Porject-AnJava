@@ -2,7 +2,9 @@ import schedule from 'node-schedule';
 import roomModel from '../models/Room';
 import { nextResetScheduleData } from '../app.js';
 import { resetRoomReserve } from '../controllers/roomControllers';
-
+import 'dayjs/locale/ko';
+import dayjs from 'dayjs';
+import dotenv from 'dotenv';
 // todo resetRoomReserve 성공 실패 핸들링
 // * todo mongo에서 reset date를 가진 방만 받을 수 있지 않나 ?
 // todo mongo sort 사용 가능 ?
@@ -53,7 +55,12 @@ export const getNextResetScheduleData = async () => {
       date: resetDate,
       nextResetRoom,
     };
-    console.log(nextResetScheduleData);
+    console.info(`getNextResetScheduleData =>
+  새로 만들어진 리셋 스케쥴 데이터 : ${JSON.stringify(
+    nextResetScheduleData,
+    null,
+    2,
+  )}`);
     return nextResetScheduleData;
   } catch (error) {
     throw new Error('getResetData Failed');
@@ -63,21 +70,24 @@ export const getNextResetScheduleData = async () => {
 let jobs;
 
 export const registerResetRoomScheduleJob = () => {
-  console.log(nextResetScheduleData);
   const { date, nextResetRoom } = nextResetScheduleData;
-  console.log(
-    `registerResetRoomScheduleJob Func: ${date}, nextResetRoom : ${nextResetRoom}`,
+  console.info(
+    `registerResetRoomScheduleJob => 
+    초기화 될 날짜${dayjs(date)
+      .locale('ko')
+      .format('YYYY년 MM월 DD일 ddd요일 - HH:mm:s Z')}, 
+     다음에 초기화 될 방 : ${nextResetRoom}`,
   );
   if (date < Date.now()) {
-    console.log(`reset 시간이 현재보다 빠릅니다.
+    console.info(`reset 시간이 현재보다 빠릅니다.
     reset date: ${date}
     now date: ${Date.now()}
-    reset 시간을 다시 등록합니다.`);
+    reset하고  다시 한번 리셋을 등록합니다.`);
     resetAndRegisterNewReset();
   } else {
     if (jobs != undefined) jobs.cancel();
     jobs = schedule.scheduleJob(date, resetAndRegisterNewReset);
-    console.log(`jobs time ${jobs.name}`);
+    console.info(`Jobs에 등록된 시간 :  ${jobs.name}`);
   }
 };
 
@@ -107,19 +117,24 @@ const setResetData = async () => {
   const { date, nextResetRoom } = newData;
   nextResetScheduleData.date = date;
   nextResetScheduleData.nextResetRoom = nextResetRoom;
-  console.info(`setResetData: 다음 리셋 날짜 ${nextResetScheduleData.date}`);
+  console.info(
+    `setResetData: 다음 리셋 날짜 ${dayjs(nextResetScheduleData.date)
+      .locale('ko')
+      .format('YYYY년 MM월 DD일 ddd요일 - HH:mm:s Z')}`,
+  );
   return true;
 };
 
 // * test용 dev모드일때만 fake reset data를 넣어줌
 export const testPatchResetDate = async () => {
+  dotenv.config();
   const fakeRoomNumArr = (function (n) {
     const arr = [];
     for (let i = 1; i <= n; i++) {
       arr.push(i);
     }
     return arr;
-  })(0);
+  })(process.env.testPatchResetDateCount);
   let count = 0;
   const promiseArr = [];
   for (let roomNum of fakeRoomNumArr) {

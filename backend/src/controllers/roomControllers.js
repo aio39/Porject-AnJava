@@ -55,6 +55,9 @@ export const resetRoomReserve = async (
             .toISOString();
         }
         foundRoom.acceptDateAfterReset = undefined;
+        console.info(
+          `resetRoomReserve - 방 ${roomNum}의 주기적 다음 리셋 날짜를 등록함. 방법: ${foundRoom.measure}`,
+        );
       } else {
         foundRoom.resetDate = undefined;
         foundRoom.acceptDate = foundRoom.acceptDateAfterReset;
@@ -97,7 +100,7 @@ export const resetUsersRoomReserve = async roomNum => {
       );
     }
     console.info(
-      `resetRoomReserve - 방 ${roomNum}을 예약한 유저들의 예약 정보 초기화`,
+      `resetUsersRoomReserve => 방 ${roomNum} 관련 유저들의 예약을 전부 삭제함.`,
     );
     return true;
   } catch (error) {
@@ -129,7 +132,7 @@ export const changeUsersRoomReserveRoomNumber = async (
       );
     }
     console.info(
-      `resetRoomReserve - 방 ${roomNum}을 예약한 유저들의 예약 정보 초기화`,
+      `changeUsersRoomReserveRoomNumber => 유저들의 예약 방 번호를 ${oldRoomNum}에서 ${newRoomNum}로 변경 `,
     );
     return true;
   } catch (error) {
@@ -180,6 +183,7 @@ export const shuffleRoom = async (roomNum, isReset = false) => {
       }),
     );
     foundRoom.save();
+    console.info(`shuffleRoom => 방 ${roomNum}의 좌석 셔플`);
     return true;
   } catch (error) {
     console.error(error);
