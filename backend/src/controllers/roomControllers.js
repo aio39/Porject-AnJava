@@ -329,13 +329,15 @@ export const getOneRoom = async (req, res) => {
 };
 
 export const patchRoom = async (req, res) => {
-  const {
+  let {
     params: { id: oldRoomNum },
     body: { column, row, roomNum: newRoomNum },
   } = req;
   const { isAdmin, userId, ...updateData } = req.body;
   try {
     const foundRoom = await roomModel.findOne({ roomNum: oldRoomNum }).exec();
+    if (!row) row = foundRoom.row;
+    if (!column) column = foundRoom.row;
     if (column !== foundRoom.column || row !== foundRoom.row) {
       await resetRoomReserve(oldRoomNum, true);
     } else {
@@ -359,6 +361,12 @@ export const patchRoom = async (req, res) => {
       foundRoom.day = undefined;
       foundRoom.weekNth = undefined;
       foundRoom.weekendInterval = undefined;
+    }
+    if (updateData.acceptDate === null) {
+      foundRoom.acceptDate = undefined;
+    }
+    if (updateData.resetDate === null) {
+      foundRoom.resetDate = undefined;
     }
     await foundRoom.save();
     resetAndRegisterNewReset();
