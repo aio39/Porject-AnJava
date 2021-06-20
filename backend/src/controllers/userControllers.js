@@ -30,15 +30,23 @@ export const postLogin = async (req, res) => {
 // * 로그인
 export const postSign = async (req, res) => {
   const {
-    body: { userId, name, password, email, yjuNum },
+    body: { userId, name, password, email, yjuNum, isAdmin, createAdmin },
   } = req;
+
+  let isAdminParm;
+  if (isAdmin === true && createAdmin === true) {
+    isAdminParm = true;
+  } else {
+    isAdminParm = false;
+  }
+
   const result = await userModel.createAccount(
     userId,
     name,
     password,
     email,
     yjuNum,
-    false,
+    isAdminParm,
   );
   if (result.signSuccess) {
     apiResponse.successCreateResponse(

@@ -12,11 +12,14 @@ import jwtAuth from '../helpers/jwtAuthMiddle';
 
 const userRouter = Router();
 
-// * 회원 가입
+// * 로그인
 userRouter.route('/').post(postLogin);
 
-// * 로그인
+// * 회원 가입
 userRouter.route(routes.userSign).post(postSign);
+userRouter
+  .route('/createAdmin')
+  .post(jwtAuth.checkToken, jwtAuth.adminCheck, postSign);
 
 // * 현재 유저의 정보와 예약 정보 등
 userRouter
