@@ -6,6 +6,7 @@ import {
   getUserDetail,
   patchUser,
   deleteUser,
+  patchGrantAdmin,
 } from '../controllers/userControllers';
 import routes from '../routes';
 import jwtAuth from '../helpers/jwtAuthMiddle';
@@ -20,6 +21,10 @@ userRouter.route(routes.userSign).post(postSign);
 userRouter
   .route('/createAdmin')
   .post(jwtAuth.checkToken, jwtAuth.adminCheck, postSign);
+
+userRouter
+  .route('/grantAdmin')
+  .patch(jwtAuth.checkToken, jwtAuth.adminCheck, patchGrantAdmin);
 
 // * 현재 유저의 정보와 예약 정보 등
 userRouter

@@ -58,6 +58,34 @@ export const postSign = async (req, res) => {
   }
 };
 
+export const patchGrantAdmin = async (req, res) => {
+  const {
+    body: { userId },
+  } = req;
+  try {
+    const user = await userModel
+      .findOneAndUpdate(
+        { userId: userId },
+        { $set: { isAdmin: true } },
+        { runValidators: true, context: 'query' },
+      )
+      .exec();
+    if (!user)
+      return apiResponse.notFoundResponse(
+        res,
+        `${userId}님은 존재하지 않습니다.`,
+      );
+
+    return apiResponse.successResponse(
+      res,
+      `${userId}님을 admin으로 변경하였습니다.`,
+    );
+  } catch (error) {
+    console.error(error);
+    return apiResponse.notFoundResponse(res, `정보를 찾지 못 했습니다.`);
+  }
+};
+
 // * 현재 유저의 정보와 예약 정보 등
 export const getUserDetail = async (req, res) => {
   const {
