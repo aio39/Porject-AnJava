@@ -94,7 +94,7 @@ RoomSchema.pre('validate', function (next) {
     this.weekendInterval = undefined;
   }
 
-  if (!this.measure) {
+  if (![0, 1].includes(this.measure)) {
     this.day = undefined;
     this.weekNth = undefined;
     this.weekendInterval = undefined;
