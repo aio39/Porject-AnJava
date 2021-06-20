@@ -34,6 +34,9 @@ export const resetRoomReserve = async (
       } else {
         foundRoom.acceptDate = undefined;
       }
+      if (!foundRoom.isShuffle) {
+        foundRoom.reservedData = [];
+      }
       if ([0, 1].includes(foundRoom.measure)) {
         // if (foundRoom.openDeffer) {
         //   foundRoom.acceptDate = roomUtility.getDeferredAcceptDate(foundRoom.resetDate,foundRoom.openDeffer)
@@ -66,6 +69,7 @@ export const resetRoomReserve = async (
           `resetRoomReserve - 방 ${roomNum}의 주기적 다음 리셋 날짜를 등록함. 방법: ${foundRoom.measure}`,
         );
       } else {
+        //  measure이 등록 되어 있지 않을 경우
         foundRoom.resetDate = undefined;
         // foundRoom.acceptDate = foundRoom.acceptDateAfterReset;
         // foundRoom.acceptDateAfterReset = undefined;
