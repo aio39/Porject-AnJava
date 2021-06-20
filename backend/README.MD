@@ -63,7 +63,7 @@
     - [x] 리셋 or 랜덤 배치 옵션
   - [x] 리셋 요청 기능
   - [x] time 관련 dayjs로 업그레이드하기
-  - [ ] 리셋 관련 옵션 validation
+  - [x] 리셋 관련 옵션 validation
 
 ## General
 

@@ -6,9 +6,10 @@ const RoomSchema = new mongoose.Schema({
     min: 1,
     max: 10000,
     unique: true,
+    required: true,
   },
-  column: { type: Number, min: 1, max: 20 },
-  row: { type: Number, min: 1, max: 20 },
+  column: { type: Number, min: 1, max: 20, required: true },
+  row: { type: Number, min: 1, max: 20, required: true },
   columnBlankLine: [Number],
   rowBlankLine: [Number],
   maxSit: Number,
@@ -57,14 +58,7 @@ const RoomSchema = new mongoose.Schema({
   },
   isShuffle: {
     type: Boolean,
-  },
-  way: {
-    type: Number,
-    validate: {
-      validator: function (v) {
-        return [0, 1, 2].includes(v); //  0 - 완전초기화 1- 랜덤 배치 2- 앞으로 전진
-      },
-    },
+    default: false,
   },
 });
 
@@ -87,20 +81,27 @@ RoomSchema.post('save', (error, doc, next) => {
 
 RoomSchema.pre('validate', function (next) {
   if (+this.measure === 0) {
-    if (!(this.weekendInterval >= 1 && this.weekendInterval <= 25))
-      return next(new Error('반복 주 간격은 1에서 25 사이여야합니다.'));
+    if (!(this.weekendInterval >= 1 && this.weekendInterval <= 55))
+      return next(new Error('반복 주 간격은 1에서 55 사이여야합니다.'));
+    this.day = undefined;
+    this.weekNth = undefined;
   }
   if (+this.measure === 1) {
     if (!(this.weekNth >= 1 && this.weekNth <= 4))
       return next(new Error('매달 몇번째 주의 값은 1에서 4 사이여야합니다.'));
     if (!(this.day >= 1 && this.day <= 55))
       return next(new Error('반복 요일은 일요일 0에서 금요일 6까지 입니다.'));
+    this.weekendInterval = undefined;
   }
 
-  if (this.measure) {
-    if (this.openDeffer && this.openDeffer <= 0)
-      return next(new Error('openDeffer 오픈 지연 시간은 0보다 커야합니다.'));
+  if (!this.measure) {
+    this.day = undefined;
+    this.weekNth = undefined;
+    this.weekendInterval = undefined;
   }
+
+  if (this.openDeffer && this.openDeffer < 0)
+    return next(new Error('openDeffer 오픈 지연 시간은 0분 이상입니다.'));
 
   //  리셋 날짜, 오픈 날짜 유효성 검사
   if (this.acceptDate && this.resetDate) {
